@@ -49,6 +49,7 @@ void SymbolTable::run(string filename)
                         Symbol symbol(name,var,level);
                         table.push(symbol);
                         cout<<"success"<<endl;
+                        table.show();
                     }
                     else {
                         table.clear();
@@ -76,7 +77,6 @@ void SymbolTable::run(string filename)
                     break;
                 }
                 case 6 : {
-                    table.pop_scope(level);
                     level++;
                     break;
                 }

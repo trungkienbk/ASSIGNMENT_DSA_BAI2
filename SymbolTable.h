@@ -83,11 +83,13 @@ public:
         this->count--;
     };
     void show(){
+        cout<<"LIST : ";
         Node *temp = head;
         while(temp!=nullptr){
             cout << temp->value.name <<"//"<<temp->value.scope<<" ";
             temp=temp->next;
         }
+        cout<<endl;
     }
     Symbol search(string name,int level) {
         Node *temp = head;
@@ -102,6 +104,11 @@ public:
         return check;
     }
     void pop_scope(int level){
+        for (;head;pop()){
+            if(head->value.scope != level) break;
+        }
+    }
+    /*void pop_scope(int level){
         Node *temp = this->head;
         while (temp != nullptr ){
             if(temp->value.scope != level) {
@@ -110,7 +117,7 @@ public:
             temp=temp->next;
             this->pop();
         }
-    }
+    }*/
 
 private:
     class Node

@@ -1,12 +1,9 @@
 BEGIN
-INSERT nFlx number
-INSERT u8T string
-INSERT qvey number
-INSERT mvoI8 string
-RPRINT
-PRINT
-END
-RPRINT
-INSERT oP string
-cc1 asd
 BEGIN
+END
+INSERT x number
+END
+INSERT y string
+INSERT x number
+INSERT y string
+END
