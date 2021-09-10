@@ -107,10 +107,9 @@ public:
             if(temp->value.scope != level) {
                 return;
             }
-            this->pop();
             temp=temp->next;
+            this->pop();
         }
-        delete temp;
     }
 
 private:

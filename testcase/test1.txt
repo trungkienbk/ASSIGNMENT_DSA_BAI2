@@ -1,9 +1,12 @@
-INSERT w00k4T string
-INSERT lQa string
-INSERT gCLi string
 BEGIN
-INSERT cX number
-INSERT c06LV string
-INSERT jr string
-INSERT n00FC1 string
-INSERT wywaLp string
+INSERT nFlx number
+INSERT u8T string
+INSERT qvey number
+INSERT mvoI8 string
+RPRINT
+PRINT
+END
+RPRINT
+INSERT oP string
+cc1 asd
+BEGIN
