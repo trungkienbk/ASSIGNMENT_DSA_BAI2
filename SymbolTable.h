@@ -104,7 +104,7 @@ public:
     void pop_scope(int level){
         Node *temp = this->head;
         while (temp != nullptr ){
-            if(temp->value.scope != level || this->head== nullptr) {
+            if(temp->value.scope != level) {
                 return;
             }
             this->pop();

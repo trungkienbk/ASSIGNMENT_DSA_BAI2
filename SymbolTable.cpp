@@ -81,13 +81,19 @@ void SymbolTable::run(string filename)
                     break;
                 }
                 default :
-                    if(level == 0) throw UnknownBlock();
+                    if(level == 0) {
+                        table.clear();
+                        throw UnknownBlock();
+                    }
                     table.pop_scope(level);
                     level--;
                     break;
             }
         }
-        if(level > 0) throw UnclosedBlock(level);
+        if(level > 0) {
+            table.clear();
+            throw UnclosedBlock(level);
+        }
         input.close();
     }
     else {
