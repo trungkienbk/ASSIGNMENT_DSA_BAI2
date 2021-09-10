@@ -1,9 +1,7 @@
-BEGIN
-BEGIN
-END
-INSERT x number
-END
-INSERT y string
 INSERT x number
 INSERT y string
+BEGIN
+INSERT x number
+LOOKUP x
+LOOKUP y
 END

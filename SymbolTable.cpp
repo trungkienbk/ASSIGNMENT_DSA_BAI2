@@ -44,12 +44,11 @@ void SymbolTable::run(string filename)
                     }
                     name = ins.substr(index[0]+1,index[1]-index[0]-1);
                     var  = ins.substr(index[1]+1);
-                    Symbol check = search(name,level);
+                    Symbol check =  table.search(name,level);
                     if(check.scope ==-1 || (check.scope !=-1 && check.scope < level)){
                         Symbol symbol(name,var,level);
                         table.push(symbol);
                         cout<<"success"<<endl;
-                        table.show();
                     }
                     else {
                         table.clear();
@@ -60,7 +59,7 @@ void SymbolTable::run(string filename)
                 case 2 : {
                     int space =(int) ins.find(' ');
                     name=ins.substr(space+1);
-                    Symbol check = search(name,level);
+                    Symbol check = table.search(name,level);
                     if(check.scope == -1) throw Undeclared(ins);
                     else {
                         cout<<check.scope<<endl;

@@ -95,7 +95,7 @@ public:
         Node *temp = head;
         while (temp != nullptr) {
             if (temp->value.name == name && temp->value.scope <= level) {
-                Symbol check = temp->value; // tim thay
+                Symbol check(temp->value.name,temp->value.type,temp->value.scope); // tim thay
                 return check;
             }
             temp=temp->next;
