@@ -1,7 +1,6 @@
-INSERT x number
-INSERT y string
-BEGIN
-INSERT x number
-LOOKUP x
-LOOKUP y
-END
+INSERT jW2abS number
+INSERT eWppcw number
+ASSIGN eWppcw 454
+INSERT cIRqYd string
+INSERT rN number
+INSERT t1RbB number

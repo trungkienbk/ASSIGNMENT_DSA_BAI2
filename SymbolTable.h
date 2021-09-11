@@ -108,6 +108,106 @@ public:
             if(head->value.scope != level) break;
         }
     }
+    bool isContains(Symbol symbol,SymbolTable &table) {
+        Node *temp = table.head;
+        while (temp != nullptr) {
+            if (symbol.name == temp->value.name ) {
+                return true;
+            }
+            temp=temp->next;
+        }
+        return false;
+    }
+    void print(){
+        SymbolTable table;
+        Node *temp = this->head;
+        while (temp != nullptr){
+            bool contains =table.isContains(temp->value,table);
+            if(contains){
+              // continue;
+            }
+            else {
+                Symbol check(temp->value.name,temp->value.type,temp->value.scope);
+               // Symbol check = this->search(temp->value.name,level);
+                if(check.scope == -1){
+                    //
+                } else {
+                    table.push(temp->value);
+                }
+            }
+            temp=temp->next;
+        }
+        if(table.size() == 0) return;
+        Node *tmp = table.head;
+        while (tmp->next !=  nullptr){
+            cout<<tmp->value.name<<"//"<<tmp->value.scope<<" ";
+            tmp=tmp->next;
+        }
+        cout<<tmp->value.name<<"//"<<tmp->value.scope<<endl;
+    }
+    void rprint(){
+        SymbolTable table;
+        Node *temp = this->head;
+        while (temp != nullptr){
+            bool contains =table.isContains(temp->value,table);
+            if(contains){
+                // continue;
+            }
+            else {
+                Symbol check(temp->value.name,temp->value.type,temp->value.scope);
+                // Symbol check = this->search(temp->value.name,level);
+                if(check.scope == -1){
+                    //
+                } else {
+                    table.push(temp->value);
+                }
+            }
+            temp=temp->next;
+        }
+        if(table.size() == 0) return;
+        Node *tmp = table.tail;
+        while (tmp->prev !=  nullptr){
+            cout<<tmp->value.name<<"//"<<tmp->value.scope<<" ";
+            tmp=tmp->prev;
+        }
+        cout<<tmp->value.name<<"//"<<tmp->value.scope<<endl;
+    }
+    void assign(string name,string var, int level,string ins);
+/*    pair<int,string> SymbolTable::search_str(vector<vector<Symbol>> &list, string name,int level) {
+        for(int i = level;i >=0; --i){
+            for(int j = list.at(i).size()-1;j>=0;--j){
+                if(list.at(i).at(j).name == name ){
+                    pair<int,string> temp = make_pair(i,list.at(i).at(j).type); // tim thay
+                    return temp;
+                }
+            }
+        }
+        return {-1,""}; // ko tim thay
+    }
+
+    void SymbolTable::assignxx(vector<vector<Symbol>> &list,string name,string var, int level,string ins) {
+        if(regex_match(var,re_num)){ // assign x 19
+            pair<int,string> check = search_str(list,name,level);
+            if(check.first==-1) throw Undeclared(ins);
+            if(check.second=="string") throw TypeMismatch(ins);
+            cout<<"success"<<endl;
+            return;
+        }
+        if(regex_match(var,re_str) && !regex_match(var,re_num)){
+            pair<int,string> check = search_str(list,name,level);
+            if(check.first==-1) throw Undeclared(ins);
+            if(check.second=="number") throw TypeMismatch(ins);
+            cout<<"success"<<endl;
+            return;}
+        if(!regex_match(var,re_str) && !regex_match(var,re_num)){
+            pair<int,string> check_x = search_str(list,var,level);
+            pair<int,string> check_y = search_str(list,name,level);
+            if(check_x.first==-1 || check_y.first==-1) throw Undeclared(ins);
+            if(check_x.second != check_y.second ) throw TypeMismatch(ins);
+            cout<<"success"<<endl;
+            return;
+        }
+    }*/
     /*void pop_scope(int level){
         Node *temp = this->head;
         while (temp != nullptr ){
@@ -131,6 +231,8 @@ private:
         }
     };
 };
+
+
 regex re_num("[0-9]*");
 regex re_str("'[a-zA-Z0-9 ]*'");
 
