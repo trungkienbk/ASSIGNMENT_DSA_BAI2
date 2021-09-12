@@ -185,11 +185,8 @@ private:
         }
     };
 };
-
-
 regex re_num("[0-9]*");
 regex re_str("'[a-zA-Z0-9 ]*'");
-
 regex in("(INSERT )([a-z][a-zA-Z_\\d]*)(( number)|( string))");
 regex as("(ASSIGN )([a-z][a-zA-Z_\\d]*)( )((\'[a-zA-Z\\d ]+\')|(\\d+)|([a-z][a-zA-Z_\\d]*))");
 regex lk("(LOOKUP )([a-z][a-zA-Z_\\d]*)");
