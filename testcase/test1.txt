@@ -1,6 +1,11 @@
-INSERT jW2abS number
-INSERT eWppcw number
-ASSIGN eWppcw 454
-INSERT cIRqYd string
-INSERT rN number
-INSERT t1RbB number
+PRINT
+LOOKUP xc
+INSERT x number false
+INSERT sum (number)->number false
+ASSIGN x 'x'
+ASSIGN z sum(12,12,12,xy)
+BEGIN
+END
+LOOKUP aaa
+a a
+

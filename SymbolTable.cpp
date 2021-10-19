@@ -1,5 +1,379 @@
 #include "SymbolTable.h"
 using namespace std;
+void SymbolTable::run(string filename)
+{
+    int cur_level = 0;
+    ifstream f(filename);
+    while (!f.eof()){
+        string ins,name,var;
+        getline(f, ins);
+        ins.erase( remove(ins.begin(), ins.end(), '\r'), ins.end() );
+        if(regex_match(ins,ins_vari)){
+            cout<<"Insert variable oke"<<endl;
+        }
+        else if (regex_match(ins,ins_func)){
+            cout<<"Insert func oke "<<endl;
+        }
+        else if (regex_match(ins, ass_val)){
+            cout<<"Assign value oke"<<endl;
+        }
+        else if(regex_match(ins, ass_vari)){
+            cout<<"Assign variable oke"<<endl;
+        }
+        else if(regex_match(ins,ass_func)){
+            cout<<"Assign func oke "<<endl;
+        }
+        else if(regex_match(ins,look_up)){
+            int space =(int) ins.find(' ');
+            name=ins.substr(space+1);
+            lookup(name,cur_level,ins);
+        }
+        else if(ins == "PRINT"){
+            preOrder();
+            cout<<"Print func oke"<<endl;
+        }
+        else if(ins == "BEGIN"){
+            cur_level++;
+            cout<<"Begin func oke"<<endl;
+        }
+        else if(ins =="END"){
+           if(cur_level == 0){
+                throw UnknownBlock();
+            }
+            while(dList->top().scope == cur_level){
+                this->removeTree(dList->top());
+                dList->pop();
+            }
+            cur_level--;
+            cout<<"End fucn oke"<<endl;
+        }
+        else throw InvalidInstruction(ins);
+    }
+    f.close();
+}
+void SymbolTable::preOrderRec(Node *cur,string &s) {
+    if(cur == nullptr){
+        return;
+    }
+    s+=cur->val.name + "//" + to_string(cur->val.scope)+ " ";
+    if(cur->left){
+        inOrderRec(cur->left,s);
+    }
+    if(cur->right){
+        inOrderRec(cur->right,s);
+    }
+}
+void SymbolTable::preOrder() {
+    string s = "";
+    preOrderRec(root,s);
+  /*  int length = (int) s.length();
+    if(length == 0) cout<<endl;
+    s.pop_back(); */
+    cout<<s<<endl;
+}
+void SymbolTable::inOrderRec(Node *&cur ,string &s) {
+    if(cur == nullptr){
+        return;
+    }
+    if(cur->left){
+        inOrderRec(cur->left,s);
+    }
+    s+=cur->val.name + "//" + to_string(cur->val.scope)+ " ";
+    if(cur->right){
+        inOrderRec(cur->right,s);
+    }
+}
+void SymbolTable::inOrder() {
+    string s;
+    inOrderRec(root,s);
+    int length = (int) s.length();
+    if(length == 0) cout<<endl;
+    s.pop_back();
+    cout<<s;
+}
+void SymbolTable::rightRotate(Node *&cur) {
+    Node *l = cur->left;      //c->t , z->cur
+    Node *t = l->right;
+    Node *p = cur->parent;
+    if(p!= nullptr){
+        if(p->left ==cur) {
+            p->left=l;
+        }
+        else {
+            p->right = l;
+        }
+    }
+    l->parent = p;
+    l->right = cur;
+    cur->parent =l;
+    cur->left = t;
+    if( t != nullptr){
+        t->parent = cur;
+    }
+}
+void SymbolTable::leftRotate(Node *&cur) {
+    Node *r = cur->right;
+    Node *t = r->left;
+    Node *p = cur->parent;
+    if(p != nullptr){
+        if(p->left == cur){
+            p->left = r;
+        }
+        else {
+            p->right = r;
+        }
+        r->parent = p;
+        r->left = cur;
+        cur->parent = r;
+        cur->right = t;
+        if(t != nullptr){
+            t->parent = cur;
+        }
+    }
+}
+void SymbolTable::splay(Node *&cur) {
+    if ( cur == nullptr)
+        return;
+    while (true)
+    {
+        Node *pare = cur->parent;
+        if (pare == nullptr)
+        {
+            // cur is root
+            break;
+        }
+        Node *gPare = pare->parent;
+        if (gPare == nullptr && pare->left == cur)
+        {
+            // zig
+            rightRotate(pare);
+        }
+        else if (gPare == nullptr && pare->right == cur)
+        {
+            // zag
+            leftRotate(pare);
+        }
+        else if (gPare->left == pare && pare->left == cur)
+        {
+            // zig-zig
+            rightRotate(gPare);
+            rightRotate(pare);
+        }
+        else if (gPare->right == pare && pare->right == cur)
+        {
+            // zag-zag
+            leftRotate(gPare);
+            leftRotate(pare);
+        }
+        else if (gPare->left == pare && pare->right == cur)
+        {
+            // zig-zag
+            leftRotate(pare);
+            rightRotate(gPare);
+        }
+        else if(gPare->right == pare && pare -> left ==cur)
+        {
+            // zag-zig
+            rightRotate(pare);
+            leftRotate(gPare);
+        }
+    }
+    root = cur;
+}
+Node *SymbolTable::searchLevell(string name, int level) {
+    Symbol *e= new Symbol(name,"null",level);
+    if (root == nullptr){
+        delete e;
+        return nullptr;
+    }
+    Node *cur=root;
+    while (true)
+    {
+        if (cur->val == *e) break;
+        else if (cur->val > *e){
+            if (cur->left == nullptr)
+                break;
+            else {
+                cur = cur->left;
+            }
+        }
+        else{
+            if (cur->right == nullptr)
+                break;
+            else {
+                cur = cur->right;
+            }
+        }
+    }
+    if (cur->val == *e){
+        delete e;
+        return cur;
+    }
+    else{
+        delete e;
+        return nullptr;
+    }
+}
+void SymbolTable::removeTree(Symbol element) {
+    Node *temp = searchLevell(element.name,element.scope);
+    if (temp == nullptr)
+        return ;
+    splay(temp);
+    Node *t = temp->left;
+    if(temp->right == nullptr){
+        root=temp->left;
+    }
+    if (t == nullptr)
+    {
+        root = temp->right;
+        root->parent = nullptr;
+    }
+    else
+    {
+        while (t->right)
+            t = t->right;
+        if (temp->right != nullptr)
+        {
+            t->right = temp->right;
+            temp->right->parent=t;
+        }
+        root = temp->left;
+        root->parent = nullptr;
+    }
+    delete(temp);
+    return;
+}
+Symbol SymbolTable::isContains(string name, int level) {
+    Symbol e("null","null",-1);
+    Node *temp = new Node(e);
+    if(root == nullptr) return e;
+        for(int i = level; i >= 0 ;--i){
+            temp = searchLevell(name,i);
+            e.name = temp->val.name;
+            e.type = temp->val.type;
+            e.scope = temp ->val.scope;
+            if(e.name != "null") break;
+    }
+        if(temp->val.name == "null") delete temp;
+        return e;
+}
+void SymbolTable::lookup(string name, int level, string ins) {
+    if(root == nullptr) throw Undeclared(ins);
+    Symbol e("null","null",-1);
+    Node *temp = new Node(e);
+    for(int i = level; i >= 0 ;--i){
+        temp = searchLevell(name,i);
+        e.name = temp->val.name;
+        e.type = temp->val.type;
+        e.scope = temp ->val.scope;
+        if(e.name != "null") break;
+    }
+    if(temp->val.name == "null") delete temp;
+    splay(temp);
+    cout<<temp->val.scope<<endl;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*Node *SymbolTable::findNode(string name,int level) {
+    Symbol *e= new Symbol(name,"null",level);
+    if (root == nullptr){
+        delete e;
+        return nullptr;
+    }
+    Node *cur=root;
+    while (true)
+    {
+        if (cur->val == *e) break;
+        else if (cur->val > *e){
+            if (cur->left == nullptr)
+                break;
+            else {
+                cur = cur->left;
+            }
+        }
+        else{
+            if (cur->right == nullptr)
+                break;
+            else {
+                cur = cur->right;
+            }
+        }
+    }
+    if (cur->val == *e){
+        delete e;
+        return cur;
+    }
+    else{
+        delete e;
+        return nullptr;
+    }
+}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*#include "SymbolTable.h"
+using namespace std;
 string isValidIns(string instruction){
     if(instruction=="BEGIN" || instruction=="END" || instruction == "PRINT" ||instruction == "RPRINT") return instruction;
     if(!regex_match(instruction, in) && !regex_match(instruction, as) && !regex_match(instruction, lk)){
@@ -149,3 +523,4 @@ void SymbolTable::assign(string name, string var, int level, string ins) {
         return;
     }
 }
+*/

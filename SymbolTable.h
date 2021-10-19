@@ -9,6 +9,172 @@ public:
     int scope;
 public:
     Symbol(){};
+    Symbol(const string &name, const string &type, int scope) : name(name), type(type), scope(scope) {};
+    bool operator>(const Symbol& e){
+        if(this->scope > e.scope) return true;
+        if(this->scope == e.scope && this->name.compare(e.name) > 0) return true;
+        return false;
+    }
+    bool operator==(const Symbol& e){
+        if(this->scope == e.scope && this->name == e.name ) return true;
+        return false;
+    }
+     void operator=(const Symbol& e){
+        this->scope = e.scope;
+        this->name = e.name ;
+        this->type = e.type;
+    }
+    ~Symbol() {};
+};
+/////////////////////////////////////////////////////////////////////////
+/////// LIST LUU THU TU//////////////////////////////////////////////////
+class LNode {
+public:
+    Symbol val;
+    LNode *prev = nullptr;
+    LNode *next = nullptr;
+    LNode(Symbol element){
+        this->val=element;
+    }
+};
+class DList{
+public:
+    LNode *head;
+    LNode *tail;
+    int count;
+public:
+    DList() : head(nullptr), tail(nullptr), count(0) {};
+    ~DList()
+    {
+        this->clear();
+    }
+    void append(Symbol symbol){
+        LNode *pNew = new LNode(symbol);
+        if (!head) {
+            head = pNew;
+            tail = head;
+            this->count++;
+            return;
+        } else {
+            tail->next = pNew;
+            pNew->prev = tail;
+            tail = pNew;
+            count++;
+        }
+    }
+    void push(Symbol symbol) {
+        LNode *pNew = new LNode(symbol);
+        if (!head) {
+            head = pNew;
+            tail = head;
+            this->count++;
+            return;
+        } else {
+            pNew->next = head;
+            head->prev = pNew;
+            head = pNew;
+            count++;
+            return;
+        }
+    }
+    void pop(){
+        if(this->head== nullptr) return;
+        LNode *temp = head;
+        if(count==1){
+            head= nullptr;
+            tail=nullptr;
+        }
+        else {
+            head=head->next;
+            head->prev = nullptr;
+        }
+        delete temp;
+        this->count--;
+    }
+    Symbol top() {
+        return head->val;
+    }
+    void clear()
+    {
+        while(head){
+            LNode *cur = head;
+            head=head->next;
+            delete(cur);
+            this->count--;
+        }
+        tail= nullptr;
+    }
+};
+///////////////////////////////////////////////////////////////////////
+class Node{
+public:
+    Symbol val;
+    Node *left;
+    Node *right;
+    Node *parent;
+    Node(Symbol data)
+    {
+        this->val = data;
+        parent = left = right = nullptr;
+    }
+};
+class SymbolTable {
+private:
+    DList *dList;
+    Node *root;
+public:
+    // TEST CONSTRUCTOR
+    // Symbol test("Hi","hi",1);
+    // LNode *pNew = new LNode(test);
+    // Node *pnew = new Node(test);
+    // Write function
+    SymbolTable() {
+        this->root = nullptr;
+    }
+    ~SymbolTable(){};
+    void run(string filename);
+    void preOrderRec(Node *cur,string &s);
+    void preOrder();
+    void inOrderRec(Node *&cur ,string &s);
+    void inOrder();
+    void rightRotate(Node *&cur);
+    void leftRotate(Node *&cur);
+    void splay(Node *&cur);
+    // Node *findNode(string s, int level);       // Use for Remove,Insert to Find node to Splay
+    Node* searchLevell(string name,int level);  // Return Node in tung level
+    void lookup(string name,int level,string ins);    // Cout scope
+    void removeTree(Symbol element);
+    Symbol isContains(string name,int level);  // Use for Insert to check Symbol is exist
+    // find -> insert -> xoa
+};
+// Insert variable
+regex ins_vari("INSERT [a-z][a-zA-Z0-9_]* (number|string) (true|false)");
+// Insert function
+regex ins_func("INSERT [a-z][a-zA-Z0-9_]* \\(((number|string)((,number)|(,string))*|)\\)->(number|string) (true|false)");
+// Assign Value
+regex ass_val("ASSIGN [a-z][a-zA-Z0-9_]* ([0-9]+|\'[a-zA-Z0-9 ]*\')");
+// Assign Variable
+regex ass_vari("ASSIGN [a-z][a-zA-Z0-9_]* [a-z][a-zA-Z0-9_]*");
+// Assign function
+regex ass_func("ASSIGN [a-z][a-zA-Z0-9_]* [a-z][a-zA-Z0-9_]*\\(([0-9]+|\'[a-zA-Z0-9 ]*\'|[a-z][a-zA-Z0-9_]*|)((,[0-9]+)|(,\'[a-zA-Z0-9 ]*\')|(,[a-z][a-zA-Z0-9_]*))*\\)");
+// Lookup variable
+regex look_up("(LOOKUP )([a-z][a-zA-Z0-9_]*)");
+#endif
+
+
+
+
+/*#ifndef SYMBOLTABLE_H
+#define SYMBOLTABLE_H
+#include "main.h"
+using namespace std;
+class Symbol{
+public:
+    string name;
+    string type;
+    int scope;
+public:
+    Symbol(){};
 
     Symbol(const string &name, const string &type, int scope) : name(name), type(type), scope(scope) {}
 
@@ -138,6 +304,7 @@ public:
             temp=temp->next;
         }
         if(table.size() == 0) return;
+
         Node *tmp = table.head;
         while (tmp->next !=  nullptr){
             cout<<tmp->value.name<<"//"<<tmp->value.scope<<" ";
@@ -195,3 +362,4 @@ regex na("[a-z][a-zA-Z\\d_]*");
 regex num("\\d+$");
 regex str("\'([a-zA-Z0-9 ]*)\'");
 #endif
+ */
