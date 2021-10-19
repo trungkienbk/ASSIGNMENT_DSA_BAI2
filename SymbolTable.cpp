@@ -18,6 +18,7 @@ void SymbolTable::run(string filename)
             cout<<"Assign value oke"<<endl;
         }
         else if(regex_match(ins, ass_vari)){
+
             cout<<"Assign variable oke"<<endl;
         }
         else if(regex_match(ins,ass_func)){
@@ -268,7 +269,10 @@ void SymbolTable::lookup(string name, int level, string ins) {
         e.scope = temp ->val.scope;
         if(e.name != "null") break;
     }
-    if(temp->val.name == "null") delete temp;
+    if(temp->val.name == "null") {
+        delete temp;
+        throw Undeclared(ins);
+    }
     splay(temp);
     cout<<temp->val.scope<<endl;
 }
