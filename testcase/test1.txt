@@ -1,11 +1,19 @@
-PRINT
-LOOKUP xc
 INSERT x number false
-INSERT sum (number)->number false
-ASSIGN x 'x'
-ASSIGN z sum(12,12,12,xy)
+PRINT
+INSERT y number false
+PRINT
+INSERT z number false
+PRINT
 BEGIN
+INSERT x number false
+PRINT
+BEGIN
+INSERT t number false
+INSERT x number false
+PRINT
 END
-LOOKUP aaa
-a a
-
+PRINT
+INSERT y number false
+PRINT
+END
+PRINT

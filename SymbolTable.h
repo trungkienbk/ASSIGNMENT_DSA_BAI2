@@ -20,11 +20,16 @@ public:
         if(this->scope == e.scope && this->name == e.name ) return true;
         return false;
     }
-     void operator=(const Symbol& e){
+    bool operator<(const Symbol& e){
+        if(this->scope < e.scope) return true;
+        if(this->scope == e.scope && this->name.compare(e.name) < 0) return true;
+        return false;
+    }
+  /*   void operator=(const Symbol& e){
         this->scope = e.scope;
         this->name = e.name ;
         this->type = e.type;
-    }
+    } */
     ~Symbol() {};
 };
 /////////////////////////////////////////////////////////////////////////
@@ -42,7 +47,7 @@ class DList{
 public:
     LNode *head;
     LNode *tail;
-    int count;
+    int count ;
 public:
     DList() : head(nullptr), tail(nullptr), count(0) {};
     ~DList()
@@ -92,9 +97,6 @@ public:
         delete temp;
         this->count--;
     }
-    Symbol top() {
-        return head->val;
-    }
     void clear()
     {
         while(head){
@@ -121,7 +123,7 @@ public:
 };
 class SymbolTable {
 private:
-    DList *dList;
+    DList dList;
     Node *root;
 public:
     // TEST CONSTRUCTOR
@@ -131,6 +133,7 @@ public:
     // Write function
     SymbolTable() {
         this->root = nullptr;
+        dList= DList();
     }
     ~SymbolTable(){};
     void run(string filename);
@@ -146,6 +149,8 @@ public:
     void lookup(string name,int level,string ins);    // Cout scope
     void removeTree(Symbol element);
     Symbol isContains(string name,int level);  // Use for Insert to check Symbol is exist
+    void insertNode(Symbol e,int &count);
+    void removeTreetemp(Symbol element);
     // find -> insert -> xoa
 };
 // Insert variable

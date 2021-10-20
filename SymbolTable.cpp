@@ -5,11 +5,36 @@ void SymbolTable::run(string filename)
     int cur_level = 0;
     ifstream f(filename);
     while (!f.eof()){
-        string ins,name,var;
+        string ins,name,var,isStatic;
         getline(f, ins);
         ins.erase( remove(ins.begin(), ins.end(), '\r'), ins.end() );
-        if(regex_match(ins,ins_vari)){
-            cout<<"Insert variable oke"<<endl;
+        if(regex_match(ins,ins_vari)) {     ///// HAM INSERT BIEn
+            int count = 0;
+            int index[3]={0,0,0};
+            int j = 0;
+            for(int i=0;i<(int)ins.size();++i){
+                if(j==3) break;
+                if(ins[i]==' '){
+                    index[j]=i;
+                    j++;
+                }
+            }
+            name = ins.substr(index[0]+1,index[1]-index[0]-1);
+            var  = ins.substr(index[1]+1,index[2]-index[1]-1);
+            isStatic = ins.substr(index[2]+1);          /////// TOI DAY IS TRUE
+            Symbol e(name,var,cur_level);
+            if(isStatic == "true"){
+                e.scope = 0;
+            } else {
+                dList.push(e);
+            }
+            Node *temp = searchLevell(e.name,e.scope);
+            if(temp== nullptr){
+                insertNode(e,count);
+            }
+            else {
+                throw Redeclared(ins);
+            }
         }
         else if (regex_match(ins,ins_func)){
             cout<<"Insert func oke "<<endl;
@@ -31,24 +56,24 @@ void SymbolTable::run(string filename)
         }
         else if(ins == "PRINT"){
             preOrder();
-            cout<<"Print func oke"<<endl;
         }
         else if(ins == "BEGIN"){
             cur_level++;
-            cout<<"Begin func oke"<<endl;
         }
         else if(ins =="END"){
            if(cur_level == 0){
                 throw UnknownBlock();
-            }
-            while(dList->top().scope == cur_level){
-                this->removeTree(dList->top());
-                dList->pop();
-            }
+           }
+           while(dList.head && dList.head->val.scope == cur_level){
+               removeTree(dList.head->val);
+               dList.pop();
+           }
             cur_level--;
-            cout<<"End fucn oke"<<endl;
         }
         else throw InvalidInstruction(ins);
+    }
+    if(cur_level > 0 ){
+        throw UnclosedBlock(cur_level);
     }
     f.close();
 }
@@ -67,9 +92,6 @@ void SymbolTable::preOrderRec(Node *cur,string &s) {
 void SymbolTable::preOrder() {
     string s = "";
     preOrderRec(root,s);
-  /*  int length = (int) s.length();
-    if(length == 0) cout<<endl;
-    s.pop_back(); */
     cout<<s<<endl;
 }
 void SymbolTable::inOrderRec(Node *&cur ,string &s) {
@@ -92,94 +114,90 @@ void SymbolTable::inOrder() {
     s.pop_back();
     cout<<s;
 }
-void SymbolTable::rightRotate(Node *&cur) {
-    Node *l = cur->left;      //c->t , z->cur
-    Node *t = l->right;
-    Node *p = cur->parent;
-    if(p!= nullptr){
-        if(p->left ==cur) {
-            p->left=l;
-        }
-        else {
+void SymbolTable::rightRotate(Node *&z) {
+    Node *l = z->left;
+    Node *c = l->right;
+    Node *p = z->parent;
+    if (p != nullptr)
+    {
+        if (p->left == z)
+            p->left = l;
+        else
             p->right = l;
-        }
     }
     l->parent = p;
-    l->right = cur;
-    cur->parent =l;
-    cur->left = t;
-    if( t != nullptr){
-        t->parent = cur;
-    }
+    l->right = z;
+    z->parent = l;
+    z->left = c;
+    if (c != nullptr)
+        c->parent = z;
 }
-void SymbolTable::leftRotate(Node *&cur) {
-    Node *r = cur->right;
-    Node *t = r->left;
-    Node *p = cur->parent;
-    if(p != nullptr){
-        if(p->left == cur){
+void SymbolTable::leftRotate(Node *&z) {
+    Node *r = z->right;
+    Node *c = r->left;
+    Node *p = z->parent;
+    if (p != nullptr)
+    {
+        if (p->left == z)
             p->left = r;
-        }
-        else {
+        else
             p->right = r;
-        }
-        r->parent = p;
-        r->left = cur;
-        cur->parent = r;
-        cur->right = t;
-        if(t != nullptr){
-            t->parent = cur;
-        }
     }
+    r->parent = p;
+    r->left = z;
+    z->parent = r;
+    z->right = c;
+    if (c != nullptr)
+        c->parent = z;
 }
-void SymbolTable::splay(Node *&cur) {
-    if ( cur == nullptr)
+void SymbolTable::splay(Node *&z) {
+    if (z == nullptr)
         return;
     while (true)
     {
-        Node *pare = cur->parent;
-        if (pare == nullptr)
+        Node *par = z->parent;
+        if (par == nullptr)
         {
-            // cur is root
+            // z is the root
             break;
         }
-        Node *gPare = pare->parent;
-        if (gPare == nullptr && pare->left == cur)
+        Node *gPar = par->parent;
+        if (gPar == nullptr && par->left == z)
         {
             // zig
-            rightRotate(pare);
+            rightRotate(par);
         }
-        else if (gPare == nullptr && pare->right == cur)
+        else if (gPar == nullptr && par->right == z)
         {
             // zag
-            leftRotate(pare);
+            leftRotate(par);
         }
-        else if (gPare->left == pare && pare->left == cur)
+        else if (gPar->left == par && par->left == z)
         {
             // zig-zig
-            rightRotate(gPare);
-            rightRotate(pare);
+            rightRotate(gPar);
+            rightRotate(par);
         }
-        else if (gPare->right == pare && pare->right == cur)
+        else if (gPar->right == par && par->right == z)
         {
             // zag-zag
-            leftRotate(gPare);
-            leftRotate(pare);
+            leftRotate(gPar);
+            leftRotate(par);
         }
-        else if (gPare->left == pare && pare->right == cur)
+        else if (gPar->left == par && par->right == z)
         {
             // zig-zag
-            leftRotate(pare);
-            rightRotate(gPare);
+            leftRotate(par);
+            rightRotate(gPar);
         }
-        else if(gPare->right == pare && pare -> left ==cur)
+        else if(gPar->right == par && par -> left ==z)
         {
             // zag-zig
-            rightRotate(pare);
-            leftRotate(gPare);
+            rightRotate(par);
+            leftRotate(gPar);
         }
     }
-    root = cur;
+    root = z;
 }
 Node *SymbolTable::searchLevell(string name, int level) {
     Symbol *e= new Symbol(name,"null",level);
@@ -215,7 +233,34 @@ Node *SymbolTable::searchLevell(string name, int level) {
         return nullptr;
     }
 }
-void SymbolTable::removeTree(Symbol element) {
+    void SymbolTable::removeTree(Symbol element) {
+        Node *z = searchLevell(element.name,element.scope);
+        if (z == nullptr)
+            return ;
+        splay(z);
+        Node *t = z->left;
+        /*if(z->right == nullptr){
+            root=z->left;
+        } */
+        if (t == nullptr)
+        {
+            root = z->right;
+            if(root != nullptr) root->parent = nullptr;
+        }
+        else
+        {
+            while (t->right)
+                t = t->right;
+            if (z->right != nullptr)
+            {
+                t->right = z->right;
+                z->right->parent=t;
+            }
+            root = z->left;
+            root->parent = nullptr;
+        }
+        delete(z);
+  /*  if(root == nullptr) return;
     Node *temp = searchLevell(element.name,element.scope);
     if (temp == nullptr)
         return ;
@@ -242,8 +287,39 @@ void SymbolTable::removeTree(Symbol element) {
         root->parent = nullptr;
     }
     delete(temp);
-    return;
+    return;*/
+
 }
+
+void SymbolTable::removeTreetemp(Symbol element)
+{   cout<<"-------------------------"<<endl;
+    Node *z = searchLevell(element.name,element.scope);
+    if (z == nullptr) return;
+    splay(z);
+    Node *t = z->left;
+    if(z->right == nullptr){
+        root=z->left;
+    }
+    else if (t == nullptr)
+    {
+        root = z->right;
+        root->parent = nullptr;
+    }
+    else
+    {
+        while (t->right)
+            t = t->right;
+        if (z->right != nullptr)
+        {
+            t->right = z->right;
+            z->right->parent=t;
+        }
+        root = z->left;
+        root->parent = nullptr;
+    }
+    delete(z);
+}
+
 Symbol SymbolTable::isContains(string name, int level) {
     Symbol e("null","null",-1);
     Node *temp = new Node(e);
@@ -264,12 +340,14 @@ void SymbolTable::lookup(string name, int level, string ins) {
     Node *temp = new Node(e);
     for(int i = level; i >= 0 ;--i){
         temp = searchLevell(name,i);
-        e.name = temp->val.name;
-        e.type = temp->val.type;
-        e.scope = temp ->val.scope;
+        if(temp != nullptr) {
+            e.name = temp->val.name;
+            e.type = temp->val.type;
+            e.scope = temp ->val.scope;
+        }
         if(e.name != "null") break;
     }
-    if(temp->val.name == "null") {
+    if(temp == nullptr) {
         delete temp;
         throw Undeclared(ins);
     }
@@ -277,6 +355,87 @@ void SymbolTable::lookup(string name, int level, string ins) {
     cout<<temp->val.scope<<endl;
 }
 
+void SymbolTable::insertNode(Symbol e, int &count) {
+    Node *t = new Node(e);
+    if (root == nullptr)
+    {
+        root = t;
+        return;
+    }
+    Node *z = root;
+    while (true)
+    {
+        if (z->val > e)
+        {   count++;
+            if (z->left == nullptr)
+            {
+                z->left = t;
+                t->parent = z;
+                break;
+            }
+            else
+                z = z->left;
+        }
+        else if (z->val < e)
+        {   count++;
+            if (z->right == nullptr)
+            {
+                z->right = t;
+                t->parent = z;
+                break;
+            }
+            else
+                z = z->right;
+        }
+        else
+        {
+            // val is already present in the three
+            break;
+        }
+    }
+    splay(t);
+    cout<<count<<" "<<(count+1)/2<<endl;
+  /*  Node *newNode = new Node(e);  // t = new Node        // z = cur
+    if (root == nullptr)
+    {   cout<<count<<" "<<(count+1)/2<<endl;
+        root = newNode;
+        return;
+    }
+    Node *cur = root;
+    while (true)
+    {
+        if (cur->val > e)
+        {
+            count++;
+            if (cur->left == nullptr)
+            {
+                cur->left = newNode;
+                newNode->parent = cur;
+                break;
+            }
+            else
+                cur = cur->left;
+        }
+        else if (cur->val < e)
+        {   count++;
+            if (cur->right == nullptr)
+            {
+                cur->right = newNode;
+                newNode->parent = cur;
+                break;
+            }
+            else
+                cur = cur->right;
+        }
+        else
+        {
+            // val is already present in the three
+            break;
+        }
+    }
+    splay(newNode);
+    cout<<count<<" "<<(count+1)/2<<endl; */
+}
 
 
 
