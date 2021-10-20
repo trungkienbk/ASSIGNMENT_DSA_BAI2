@@ -1,19 +1,14 @@
-INSERT x number false
-PRINT
-INSERT y number false
-PRINT
-INSERT z number false
-PRINT
-BEGIN
-INSERT x number false
-PRINT
-BEGIN
-INSERT t number false
-INSERT x number false
-PRINT
-END
-PRINT
-INSERT y number false
-PRINT
-END
-PRINT
+INSERT b01 (number)->number false
+INSERT b02 string true
+INSERT b05 (number,string)->string false
+INSERT b03 (number,string)->string false
+INSERT b62 (number)->number false
+INSERT b23 string true
+INSERT b22 (number,string)->string false
+INSERT b89 (number,string)->string false
+INSERT b00 (number)->number false
+INSERT b21 string true
+INSERT b77 (number,string)->string false
+INSERT b65 number true
+INSERT b98 (number,string)->string false
+INSERT b10 (number,string)->string false

@@ -5,10 +5,10 @@ void SymbolTable::run(string filename)
     int cur_level = 0;
     ifstream f(filename);
     while (!f.eof()){
-        string ins,name,var,isStatic;
+        string ins,name,var,isStatic,decode;
         getline(f, ins);
         ins.erase( remove(ins.begin(), ins.end(), '\r'), ins.end() );
-        if(regex_match(ins,ins_vari)) {     ///// HAM INSERT BIEn
+        if(regex_match(ins,ins_vari)) {     ///// HAM INSERT BIEN
             int count = 0;
             int index[3]={0,0,0};
             int j = 0;
@@ -27,6 +27,9 @@ void SymbolTable::run(string filename)
                 e.scope = 0;
             } else {
                 dList.push(e);
+                if(dList.head->val.scope == 0){
+                    dList.pop();
+                }
             }
             Node *temp = searchLevell(e.name,e.scope);
             if(temp== nullptr){
@@ -36,8 +39,61 @@ void SymbolTable::run(string filename)
                 throw Redeclared(ins);
             }
         }
-        else if (regex_match(ins,ins_func)){
-            cout<<"Insert func oke "<<endl;
+        else if (regex_match(ins,ins_func)){        ///// HAM INSERT FUNCTION
+            int count = 0;
+            int index[3]={0,0,0};
+            int j = 0;
+            for(int i=0;i<(int)ins.size();++i){
+                if(j==3) break;
+                if(ins[i]==' '){
+                    index[j]=i;
+                    j++;
+                }
+            }
+            name = ins.substr(index[0]+1,index[1]-index[0]-1);
+            decode  = ins.substr(index[1]+1,index[2]-index[1]-1);
+            isStatic = ins.substr(index[2]+1);
+            decode.erase( remove(decode.begin(), decode.end(), '-'), decode.end() );
+            decode.erase( remove(decode.begin(), decode.end(), '>'), decode.end() );
+            decode.erase( remove(decode.begin(), decode.end(), '('), decode.end() );
+            decode.erase( remove(decode.begin(), decode.end(), '('), decode.end() );
+            decode.erase( remove(decode.begin(), decode.end(), ')'), decode.end() );
+            decode.erase( remove(decode.begin(), decode.end(), ','), decode.end() );
+            while(true){
+                int n = decode.find("number");
+                if(n == -1) break;
+                if(decode.substr(n,6)=="number"){
+                    decode.replace(n,6,"1");
+                }
+            }
+            while(true){
+                int n = decode.find("string");
+                if(n == -1) break;
+                if(decode.substr(n,6)=="string"){
+                    decode.replace(n,6,"0");
+                }
+            }
+            if(decode[decode.length()-1] == '1'){
+                var = "number";
+            }
+            else var = "string";
+            Symbol e(name,var,cur_level);
+            if(isStatic == "true"){
+                e.scope = 0;
+            } else {
+                dList.push(e);
+                if(dList.head->val.scope == 0){
+                    dList.pop();
+                }
+            }
+            Node *temp = searchLevell(e.name,e.scope);
+            if(temp== nullptr){
+                e.decodes = decode;
+                insertNode(e,count);
+            }
+            else {
+                throw Redeclared(ins);
+            }
         }
         else if (regex_match(ins, ass_val)){
             cout<<"Assign value oke"<<endl;
@@ -83,10 +139,10 @@ void SymbolTable::preOrderRec(Node *cur,string &s) {
     }
     s+=cur->val.name + "//" + to_string(cur->val.scope)+ " ";
     if(cur->left){
-        inOrderRec(cur->left,s);
+        preOrderRec(cur->left,s);
     }
     if(cur->right){
-        inOrderRec(cur->right,s);
+        preOrderRec(cur->right,s);
     }
 }
 void SymbolTable::preOrder() {
@@ -239,9 +295,6 @@ Node *SymbolTable::searchLevell(string name, int level) {
             return ;
         splay(z);
         Node *t = z->left;
-        /*if(z->right == nullptr){
-            root=z->left;
-        } */
         if (t == nullptr)
         {
             root = z->right;
@@ -260,39 +313,10 @@ Node *SymbolTable::searchLevell(string name, int level) {
             root->parent = nullptr;
         }
         delete(z);
-  /*  if(root == nullptr) return;
-    Node *temp = searchLevell(element.name,element.scope);
-    if (temp == nullptr)
-        return ;
-    splay(temp);
-    Node *t = temp->left;
-    if(temp->right == nullptr){
-        root=temp->left;
-    }
-    if (t == nullptr)
-    {
-        root = temp->right;
-        root->parent = nullptr;
-    }
-    else
-    {
-        while (t->right)
-            t = t->right;
-        if (temp->right != nullptr)
-        {
-            t->right = temp->right;
-            temp->right->parent=t;
-        }
-        root = temp->left;
-        root->parent = nullptr;
-    }
-    delete(temp);
-    return;*/
-
 }
 
 void SymbolTable::removeTreetemp(Symbol element)
-{   cout<<"-------------------------"<<endl;
+{
     Node *z = searchLevell(element.name,element.scope);
     if (z == nullptr) return;
     splay(z);
@@ -356,9 +380,10 @@ void SymbolTable::lookup(string name, int level, string ins) {
 }
 
 void SymbolTable::insertNode(Symbol e, int &count) {
+
     Node *t = new Node(e);
     if (root == nullptr)
-    {
+    {   cout<<count<<" "<<(count+1)/2<<endl;
         root = t;
         return;
     }
@@ -395,47 +420,9 @@ void SymbolTable::insertNode(Symbol e, int &count) {
     }
     splay(t);
     cout<<count<<" "<<(count+1)/2<<endl;
-  /*  Node *newNode = new Node(e);  // t = new Node        // z = cur
-    if (root == nullptr)
-    {   cout<<count<<" "<<(count+1)/2<<endl;
-        root = newNode;
-        return;
-    }
-    Node *cur = root;
-    while (true)
-    {
-        if (cur->val > e)
-        {
-            count++;
-            if (cur->left == nullptr)
-            {
-                cur->left = newNode;
-                newNode->parent = cur;
-                break;
-            }
-            else
-                cur = cur->left;
-        }
-        else if (cur->val < e)
-        {   count++;
-            if (cur->right == nullptr)
-            {
-                cur->right = newNode;
-                newNode->parent = cur;
-                break;
-            }
-            else
-                cur = cur->right;
-        }
-        else
-        {
-            // val is already present in the three
-            break;
-        }
-    }
-    splay(newNode);
-    cout<<count<<" "<<(count+1)/2<<endl; */
 }
+
+
 
 
 

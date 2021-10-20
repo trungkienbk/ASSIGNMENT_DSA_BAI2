@@ -7,7 +7,7 @@ public:
     string name;
     string type;
     int scope;
-    string variable = "";
+    string decodes = ""; // Chua decode
 public:
     Symbol(){};
     Symbol(const string &name, const string &type, int scope) : name(name), type(type), scope(scope) {};
