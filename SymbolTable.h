@@ -32,7 +32,6 @@ public:
     } */
     ~Symbol() {};
 };
-/////////////////////////////////////////////////////////////////////////
 /////// LIST LUU THU TU//////////////////////////////////////////////////
 class LNode {
 public:
@@ -108,7 +107,7 @@ public:
         tail= nullptr;
     }
 };
-///////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 class Node{
 public:
     Symbol val;
@@ -143,15 +142,13 @@ public:
     void inOrder();
     void rightRotate(Node *&cur);
     void leftRotate(Node *&cur);
-    void splay(Node *&cur);
-    // Node *findNode(string s, int level);       // Use for Remove,Insert to Find node to Splay
+    void splay(Node *&z);
     Node* searchLevell(string name,int level);  // Return Node in tung level
     void lookup(string name,int level,string ins);    // Cout scope
     void removeTree(Symbol element);
     Symbol isContains(string name,int level);  // Use for Insert to check Symbol is exist
     void insertNode(Symbol e,int &count);
-    void removeTreetemp(Symbol element);
-    // find -> insert -> xoa
+    void splay_insert(Node *&cur,int &nump_splay);
 };
 // Insert variable
 regex ins_vari("INSERT [a-z][a-zA-Z0-9_]* (number|string) (true|false)");

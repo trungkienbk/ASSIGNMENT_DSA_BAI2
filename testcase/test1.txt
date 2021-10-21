@@ -1,14 +1,92 @@
-INSERT b01 (number)->number false
-INSERT b02 string true
-INSERT b05 (number,string)->string false
-INSERT b03 (number,string)->string false
-INSERT b62 (number)->number false
-INSERT b23 string true
-INSERT b22 (number,string)->string false
-INSERT b89 (number,string)->string false
-INSERT b00 (number)->number false
-INSERT b21 string true
-INSERT b77 (number,string)->string false
-INSERT b65 number true
-INSERT b98 (number,string)->string false
-INSERT b10 (number,string)->string false
+INSERT s7yFrj string false
+BEGIN
+INSERT ag number false
+BEGIN
+INSERT hMbbx number false
+INSERT eVAit number true
+INSERT f3zt string false
+PRINT
+BEGIN
+END
+BEGIN
+LOOKUP hMbbx
+BEGIN
+BEGIN
+END
+LOOKUP eVAit
+BEGIN
+INSERT o string false
+BEGIN
+PRINT
+INSERT f5kca string true
+BEGIN
+BEGIN
+PRINT
+END
+PRINT
+INSERT ndYZr number true
+LOOKUP ndYZr
+END
+LOOKUP o
+END
+LOOKUP s7yFrj
+END
+LOOKUP f3zt
+INSERT uy8ss string false
+PRINT
+PRINT
+END
+LOOKUP f5kca
+BEGIN
+PRINT
+PRINT
+LOOKUP hMbbx
+END
+INSERT aAO number true
+LOOKUP aAO
+PRINT
+END
+PRINT
+LOOKUP o
+PRINT
+INSERT bplnyF ()->number false
+ASSIGN f3zt o
+LOOKUP hMbbx
+LOOKUP o
+INSERT aYFxNI string true
+BEGIN
+BEGIN
+BEGIN
+PRINT
+PRINT
+LOOKUP aAO
+BEGIN
+LOOKUP eVAit
+LOOKUP hMbbx
+LOOKUP ndYZr
+END
+END
+INSERT cm (string,number,number)->number true
+ASSIGN cm f3zt
+PRINT
+LOOKUP ndYZr
+LOOKUP bplnyF
+BEGIN
+END
+INSERT iC4gtM string false
+BEGIN
+PRINT
+BEGIN
+PRINT
+PRINT
+LOOKUP f5kca
+INSERT h number false
+END
+PRINT
+LOOKUP iC4gtM
+BEGIN
+PRINT
+END
+LOOKUP o
+LOOKUP iC4gtM
+BEGIN
