@@ -1,20 +1,23 @@
-INSERT x string true
-INSERT y number true
+INSERT l (string,string,string)->number true
+INSERT gC number false
+INSERT p4_ (string,number,number)->number false
+INSERT uKO_ (string,string,number)->number true
+INSERT x_879 number true
+INSERT j__7RV number true
+INSERT e_8_17_ string false
 PRINT
-BEGIN
-INSERT y number false
+INSERT cy_BZj9_ (number,number,number)->string false
+INSERT zK_mTG__1 (number,number,string)->number false
+INSERT nh_3_PUKS9 number false
+INSERT lNqx4_oLJY0 number false
 PRINT
-BEGIN
-BEGIN
-INSERT x string false
-INSERT t string true
-PRINT
-ASSIGN t x
-END
-END
-INSERT z number false
-ASSIGN x z
-END
-INSERT func ()->string true
-ASSIGN x y
-PRINT
+INSERT v3eF6m____9O (string,number,string)->string false
+INSERT mGN1_Z_TY_F47 string true
+INSERT kcEVAQz6_j_31l (string,number,number)->number false
+INSERT l_hm_2v_R3E_V_N string false
+INSERT mm_L_ZjW_5p_zITQ string true
+INSERT oYY_bQ1GLE_Nz8_Ia string true
+INSERT cx947O_7t4Akf3rxTN number false
+INSERT g__b64_XFL0R__C4_6R string true
+INSERT gDUKH_JLe216xc3RZlXL string true
+ASSIGN lNqx4_oLJY0 cx947O_7t4Akf3rxTN

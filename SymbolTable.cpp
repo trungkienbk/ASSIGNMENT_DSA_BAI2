@@ -68,7 +68,7 @@ void SymbolTable::run(string filename)
                 e.scope = 0;
             } else {
                 if(cur_level > 0){
-                    throw InvalidInstruction(ins);
+                    throw InvalidDeclaration(ins);
                 }
            //     dList.push(e);
             //    if(dList.head->val.scope == 0){
@@ -88,8 +88,31 @@ void SymbolTable::run(string filename)
                 throw Redeclared(ins);
             }
         }
-        else if (regex_match(ins, ass_val)){
-            cout<<"Assign value oke"<<endl;
+        else if (regex_match(ins, ass_val)){ //// HAM ASSIGN BIEN
+            string id,valu;
+            int num_comp = 0;
+            int num_splay = 0;
+            int index[2]={0,0};
+            int j = 0;
+            for(int i=0;i<(int)ins.size();++i){
+                if(j==2) break;
+                if(ins[i]==' '){
+                    index[j]=i;
+                    j++;
+                }
+            }
+            id = ins.substr(index[0]+1,index[1]-index[0]-1);
+            valu = ins.substr(index[1]+1);
+            string valu_type;
+            if(valu[0]=='\'') valu_type = "string";
+            else valu_type = "number";
+            Node *temp = isContains(id,cur_level,num_comp,num_splay);
+            if(temp == nullptr) throw Undeclared(ins);
+            if(temp->val.decodes[0] == '(') throw TypeMismatch(ins);
+            if(temp->val.type != valu_type){
+                throw TypeMismatch(ins);
+            }
+            cout<<num_comp<<" "<<num_splay<<endl;
         }
         else if(regex_match(ins, ass_vari)){
             string id,valu;
@@ -118,6 +141,7 @@ void SymbolTable::run(string filename)
             cout<<num_comp<<" "<<num_splay<<endl;
         }
         else if(regex_match(ins,ass_func)){
+
             cout<<"Assign func oke "<<endl;
         }
         else if(regex_match(ins,look_up)){
