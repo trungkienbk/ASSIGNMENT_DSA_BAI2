@@ -40,43 +40,6 @@ void SymbolTable::run(string filename)
             }
         }
         else if (regex_match(ins,ins_func)){        ///// HAM INSERT FUNCTION
-         /*   int count = 0;
-            int index[3]={0,0,0};
-            int j = 0;
-            for(int i=0;i<(int)ins.size();++i){
-                if(j==3) break;
-                if(ins[i]==' '){
-                    index[j]=i;
-                    j++;
-                }
-            }
-            name = ins.substr(index[0]+1,index[1]-index[0]-1);
-            decode  = ins.substr(index[1]+1,index[2]-index[1]-1);
-            isStatic = ins.substr(index[2]+1);
-            decode.erase( remove(decode.begin(), decode.end(), '-'), decode.end() );
-            decode.erase( remove(decode.begin(), decode.end(), '>'), decode.end() );
-            decode.erase( remove(decode.begin(), decode.end(), '('), decode.end() );
-            decode.erase( remove(decode.begin(), decode.end(), '('), decode.end() );
-            decode.erase( remove(decode.begin(), decode.end(), ')'), decode.end() );
-            decode.erase( remove(decode.begin(), decode.end(), ','), decode.end() );
-            while(true){
-                int n = decode.find("number");
-                if(n == -1) break;
-                if(decode.substr(n,6)=="number"){
-                    decode.replace(n,6,"1");
-                }
-            }
-            while(true){
-                int n = decode.find("string");
-                if(n == -1) break;
-                if(decode.substr(n,6)=="string"){
-                    decode.replace(n,6,"0");
-                }
-            }
-            if(decode[decode.length()-1] == '1'){
-                var = "number";
-            }
-            else var = "string"; */
             int count = 0;
             int index[3]={0,0,0};
             int j = 0;
@@ -130,7 +93,6 @@ void SymbolTable::run(string filename)
         }
         else if(regex_match(ins, ass_vari)){
             string id,valu;
-            int count = 0;
             int num_comp = 0;
             int num_splay = 0;
             int index[2]={0,0};
@@ -142,23 +104,17 @@ void SymbolTable::run(string filename)
                     j++;
                 }
             }
-            // INSERT x y
             id = ins.substr(index[0]+1,index[1]-index[0]-1);
             valu = ins.substr(index[1]+1);
-            Node *temp_valu = searchLevell_assign(valu,cur_level,count);
+            Node *temp_valu = isContains(valu,cur_level,num_comp,num_splay);
             if(temp_valu == nullptr) throw Undeclared(ins);
             if(temp_valu->val.decodes !="") throw TypeMismatch(ins);
-            else {
-                num_comp+=count;
-                num_splay+=count/2;
+            Node *temp_id = isContains(id,cur_level,num_comp,num_splay);
+            if(temp_id == nullptr) {
+                throw Undeclared(ins);
             }
-            count = 0;
-            Node *temp_id = searchLevell_assign(id,cur_level,count);
-            if(temp_id == nullptr) throw Undeclared(ins);
             if(temp_id->val.decodes !="") throw TypeMismatch(ins);
             if(temp_id->val.type != temp_valu->val.type) throw TypeMismatch(ins);
-            num_comp+=count;
-            num_splay+=count/2;
             cout<<num_comp<<" "<<num_splay<<endl;
         }
         else if(regex_match(ins,ass_func)){
@@ -394,20 +350,6 @@ void SymbolTable::removeTree(Symbol element) {
         }
         delete(z);
 }
-Symbol SymbolTable::isContains(string name, int level) {
-    Symbol e("null","null",-1);
-    Node *temp = new Node(e);
-    if(root == nullptr) return e;
-        for(int i = level; i >= 0 ;--i){
-            temp = searchLevell(name,i);
-            e.name = temp->val.name;
-            e.type = temp->val.type;
-            e.scope = temp ->val.scope;
-            if(e.name != "null") break;
-    }
-        if(temp->val.name == "null") delete temp;
-        return e;
-}
 void SymbolTable::lookup(string name, int level, string ins) {
     if(root == nullptr) throw Undeclared(ins);
     Symbol e("null","null",-1);
@@ -431,7 +373,7 @@ void SymbolTable::lookup(string name, int level, string ins) {
 void SymbolTable::insertNode(Symbol e, int &count) {
     Node *t = new Node(e);
     if (root == nullptr)
-    {   cout<<count<<" "<<(count+1)/2<<endl;
+    {   cout<<count<<" "<<"0"<<endl;
         root = t;
         return;
     }
@@ -467,7 +409,7 @@ void SymbolTable::insertNode(Symbol e, int &count) {
         }
     }
     splay(t);
-    cout<<count<<" "<<(count+1)/2<<endl;
+    cout<<count<<" "<<"1"<<endl;
     /*   int num_splay = 0;
        Node *t = new Node(e);
        if (root == nullptr)
@@ -565,7 +507,20 @@ void SymbolTable::splay_insert(Node *&z, int &nump_splay) {
     }
     root = z;
 }
-Node *SymbolTable::searchLevell_assign(string name, int level, int &count) {
+Node* SymbolTable::isContains(string name, int level,int &num_comp,int &num_splay) {
+    int temp_comp= num_comp;
+    int temp_splay = num_splay;
+    Node *temp = nullptr;
+    if(root == nullptr) return nullptr;
+    for(int i = level; i >= 0 ;--i){
+        num_comp = temp_comp;
+        num_splay = num_splay;
+        temp = searchLevell_assign(name,i,num_comp,num_splay);
+        if(temp!= nullptr) break;
+    }
+    return temp;
+}
+Node *SymbolTable::searchLevell_assign(string name, int level, int &num_comp,int &num_splay) {
     Symbol *e= new Symbol(name,"null",level);
     if (root == nullptr){
         delete e;
@@ -574,9 +529,12 @@ Node *SymbolTable::searchLevell_assign(string name, int level, int &count) {
     Node *cur=root;
     while (true)
     {
-        if (cur->val == *e) break;
+        if (cur->val == *e) {
+            num_comp++;
+            break;
+        }
         else if (cur->val > *e){
-            count++;
+            num_comp++;
             if (cur->left == nullptr)
                 break;
             else {
@@ -584,7 +542,7 @@ Node *SymbolTable::searchLevell_assign(string name, int level, int &count) {
             }
         }
         else{
-            count++;
+            num_comp++;
             if (cur->right == nullptr)
                 break;
             else {
@@ -593,6 +551,8 @@ Node *SymbolTable::searchLevell_assign(string name, int level, int &count) {
         }
     }
     if (cur->val == *e){
+        if(cur!=root) num_splay++;
+        splay(cur);
         delete e;
         return cur;
     }

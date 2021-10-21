@@ -1,26 +1,20 @@
-BEGIN
-INSERT htI2JM string false
+INSERT x string true
+INSERT y number true
 PRINT
 BEGIN
-LOOKUP htI2JM
+INSERT y number false
 PRINT
 BEGIN
-LOOKUP htI2JM
-PRINT
-INSERT s string false
-PRINT
-INSERT du number true
-PRINT
 BEGIN
-LOOKUP du
+INSERT x string false
+INSERT t string true
 PRINT
+ASSIGN t x
 END
-PRINT
-INSERT f number false
-PRINT
 END
-PRINT
+INSERT z number false
+ASSIGN x z
 END
-PRINT
-END
+INSERT func ()->string true
+ASSIGN x y
 PRINT
