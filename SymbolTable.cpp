@@ -40,7 +40,7 @@ void SymbolTable::run(string filename)
             }
         }
         else if (regex_match(ins,ins_func)){        ///// HAM INSERT FUNCTION
-            int count = 0;
+         /*   int count = 0;
             int index[3]={0,0,0};
             int j = 0;
             for(int i=0;i<(int)ins.size();++i){
@@ -76,7 +76,30 @@ void SymbolTable::run(string filename)
             if(decode[decode.length()-1] == '1'){
                 var = "number";
             }
+            else var = "string"; */
+            int count = 0;
+            int index[3]={0,0,0};
+            int j = 0;
+            for(int i=0;i<(int)ins.size();++i){
+                if(j==3) break;
+                if(ins[i]==' '){
+                    index[j]=i;
+                    j++;
+                }
+            }
+            name = ins.substr(index[0]+1,index[1]-index[0]-1);
+            decode  = ins.substr(index[1]+1,index[2]-index[1]-1);
+            isStatic = ins.substr(index[2]+1);
+            string decode_tmp = "(";
+            for(int i = 0 ; i < (int) decode.length() ;++i){ // number -> 0 , string -> 1
+                if(decode[i] == 'm') decode_tmp+="0";
+                if(decode[i] == 's') decode_tmp+="1";
+            }
+            if(decode_tmp[decode_tmp.length()-1] == '0'){
+                var = "number";
+            }
             else var = "string";
+            decode_tmp.pop_back();
             Symbol e(name,var,cur_level);
             if(isStatic == "true"){
                 e.scope = 0;
@@ -84,15 +107,19 @@ void SymbolTable::run(string filename)
                 if(cur_level > 0){
                     throw InvalidInstruction(ins);
                 }
+           //     dList.push(e);
+            //    if(dList.head->val.scope == 0){
+              //      dList.pop();
+               // }
+            }
+            Node *temp = searchLevell(e.name,e.scope);
+            if(temp== nullptr){
+                e.decodes = decode_tmp;
+                insertNode(e,count);
                 dList.push(e);
                 if(dList.head->val.scope == 0){
                     dList.pop();
                 }
-            }
-            Node *temp = searchLevell(e.name,e.scope);
-            if(temp== nullptr){
-                e.decodes = decode;
-                insertNode(e,count);
             }
             else {
                 throw Redeclared(ins);
@@ -102,8 +129,37 @@ void SymbolTable::run(string filename)
             cout<<"Assign value oke"<<endl;
         }
         else if(regex_match(ins, ass_vari)){
-
-            cout<<"Assign variable oke"<<endl;
+            string id,valu;
+            int count = 0;
+            int num_comp = 0;
+            int num_splay = 0;
+            int index[2]={0,0};
+            int j = 0;
+            for(int i=0;i<(int)ins.size();++i){
+                if(j==2) break;
+                if(ins[i]==' '){
+                    index[j]=i;
+                    j++;
+                }
+            }
+            // INSERT x y
+            id = ins.substr(index[0]+1,index[1]-index[0]-1);
+            valu = ins.substr(index[1]+1);
+            Node *temp_valu = searchLevell_assign(valu,cur_level,count);
+            if(temp_valu == nullptr) throw Undeclared(ins);
+            if(temp_valu->val.decodes !="") throw TypeMismatch(ins);
+            else {
+                num_comp+=count;
+                num_splay+=count/2;
+            }
+            count = 0;
+            Node *temp_id = searchLevell_assign(id,cur_level,count);
+            if(temp_id == nullptr) throw Undeclared(ins);
+            if(temp_id->val.decodes !="") throw TypeMismatch(ins);
+            if(temp_id->val.type != temp_valu->val.type) throw TypeMismatch(ins);
+            num_comp+=count;
+            num_splay+=count/2;
+            cout<<num_comp<<" "<<num_splay<<endl;
         }
         else if(regex_match(ins,ass_func)){
             cout<<"Assign func oke "<<endl;
@@ -123,10 +179,19 @@ void SymbolTable::run(string filename)
            if(cur_level == 0){
                 throw UnknownBlock();
            }
-           while(dList.head && dList.head->val.scope == cur_level){
+           DList store_order;
+           /*while(dList.head && dList.head->val.scope == cur_level){
                removeTree(dList.head->val);
                dList.pop();
-           }
+           }*/
+            while(dList.head && dList.head->val.scope == cur_level){
+                store_order.push(dList.head->val);
+                dList.pop();
+            }
+            while(store_order.head && store_order.head->val.scope == cur_level){
+                removeTree(store_order.head->val);
+                store_order.pop();
+            }
             cur_level--;
         }
         else throw InvalidInstruction(ins);
@@ -304,7 +369,13 @@ void SymbolTable::removeTree(Symbol element) {
             return ;
         splay(z);
         Node *t = z->left;
-        if (t == nullptr)
+       /* if(z->right == nullptr){
+        root=z->left; }*/
+        if(z->right == nullptr){
+            root = z ->left;
+            if(root != nullptr) root->parent = nullptr;
+        }
+        else if (t == nullptr)
         {
             root = z->right;
             if(root != nullptr) root->parent = nullptr;
@@ -493,6 +564,42 @@ void SymbolTable::splay_insert(Node *&z, int &nump_splay) {
         }
     }
     root = z;
+}
+Node *SymbolTable::searchLevell_assign(string name, int level, int &count) {
+    Symbol *e= new Symbol(name,"null",level);
+    if (root == nullptr){
+        delete e;
+        return nullptr;
+    }
+    Node *cur=root;
+    while (true)
+    {
+        if (cur->val == *e) break;
+        else if (cur->val > *e){
+            count++;
+            if (cur->left == nullptr)
+                break;
+            else {
+                cur = cur->left;
+            }
+        }
+        else{
+            count++;
+            if (cur->right == nullptr)
+                break;
+            else {
+                cur = cur->right;
+            }
+        }
+    }
+    if (cur->val == *e){
+        delete e;
+        return cur;
+    }
+    else{
+        delete e;
+        return nullptr;
+    }
 }
 
 

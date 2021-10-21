@@ -143,7 +143,8 @@ public:
     void rightRotate(Node *&cur);
     void leftRotate(Node *&cur);
     void splay(Node *&z);
-    Node* searchLevell(string name,int level);  // Return Node in tung level
+    Node* searchLevell(string name,int level);// Return Node in tung level
+    Node* searchLevell_assign(string name,int level,int &count);
     void lookup(string name,int level,string ins);    // Cout scope
     void removeTree(Symbol element);
     Symbol isContains(string name,int level);  // Use for Insert to check Symbol is exist
