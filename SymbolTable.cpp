@@ -538,7 +538,7 @@ Node* SymbolTable::isContains(string name, int level,int &num_comp,int &num_spla
     if(root == nullptr) return nullptr;
     for(int i = level; i >= 0 ;--i){
         num_comp = temp_comp;
-        num_splay = num_splay;
+        num_splay = temp_splay;
         temp = searchLevell_assign(name,i,num_comp,num_splay);
         if(temp!= nullptr) break;
     }
