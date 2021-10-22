@@ -5,146 +5,26 @@ void SymbolTable::run(string filename)
     int cur_level = 0;
     ifstream f(filename);
     while (!f.eof()){
-        string ins,name,var,isStatic,decode;
+        string ins;
         getline(f, ins);
         ins.erase( remove(ins.begin(), ins.end(), '\r'), ins.end() );
         if(regex_match(ins,ins_vari)) {     ///// HAM INSERT BIEN
-            int count = 0;
-            int index[3]={0,0,0};
-            int j = 0;
-            for(int i=0;i<(int)ins.size();++i){
-                if(j==3) break;
-                if(ins[i]==' '){
-                    index[j]=i;
-                    j++;
-                }
-            }
-            name = ins.substr(index[0]+1,index[1]-index[0]-1);
-            var  = ins.substr(index[1]+1,index[2]-index[1]-1);
-            isStatic = ins.substr(index[2]+1);
-            Symbol e(name,var,cur_level);
-            if(isStatic == "true"){
-                e.scope = 0;
-            } else {
-                dList.push(e);
-                if(dList.head->val.scope == 0){
-                    dList.pop();
-                }
-            }
-            Node *temp = searchLevell(e.name,e.scope);
-            if(temp== nullptr){
-                insertNode(e,count);
-            }
-            else {
-                throw Redeclared(ins);
-            }
+            insert_value(ins,cur_level);
         }
-        else if (regex_match(ins,ins_func)){        ///// HAM INSERT FUNCTION
-            int count = 0;
-            int index[3]={0,0,0};
-            int j = 0;
-            for(int i=0;i<(int)ins.size();++i){
-                if(j==3) break;
-                if(ins[i]==' '){
-                    index[j]=i;
-                    j++;
-                }
-            }
-            name = ins.substr(index[0]+1,index[1]-index[0]-1);
-            decode  = ins.substr(index[1]+1,index[2]-index[1]-1);
-            isStatic = ins.substr(index[2]+1);
-            string decode_tmp = "(";
-            for(int i = 0 ; i < (int) decode.length() ;++i){ // number -> 0 , string -> 1
-                if(decode[i] == 'm') decode_tmp+="0";
-                if(decode[i] == 's') decode_tmp+="1";
-            }
-            if(decode_tmp[decode_tmp.length()-1] == '0'){
-                var = "number";
-            }
-            else var = "string";
-            decode_tmp.pop_back();
-            Symbol e(name,var,cur_level);
-            if(isStatic == "true"){
-                e.scope = 0;
-            } else {
-                if(cur_level > 0){
-                    throw InvalidDeclaration(ins);
-                }
-           //     dList.push(e);
-            //    if(dList.head->val.scope == 0){
-              //      dList.pop();
-               // }
-            }
-            Node *temp = searchLevell(e.name,e.scope);
-            if(temp== nullptr){
-                e.decodes = decode_tmp;
-                insertNode(e,count);
-                dList.push(e);
-                if(dList.head->val.scope == 0){
-                    dList.pop();
-                }
-            }
-            else {
-                throw Redeclared(ins);
-            }
+        else if (regex_match(ins,ins_func)){ ///// HAM INSERT FUNCTION
+            insert_func(ins,cur_level);
         }
-        else if (regex_match(ins, ass_val)){ //// HAM ASSIGN BIEN
-            string id,valu;
-            int num_comp = 0;
-            int num_splay = 0;
-            int index[2]={0,0};
-            int j = 0;
-            for(int i=0;i<(int)ins.size();++i){
-                if(j==2) break;
-                if(ins[i]==' '){
-                    index[j]=i;
-                    j++;
-                }
-            }
-            id = ins.substr(index[0]+1,index[1]-index[0]-1);
-            valu = ins.substr(index[1]+1);
-            string valu_type;
-            if(valu[0]=='\'') valu_type = "string";
-            else valu_type = "number";
-            Node *temp = isContains(id,cur_level,num_comp,num_splay);
-            if(temp == nullptr) throw Undeclared(ins);
-            if(temp->val.decodes[0] == '(') throw TypeMismatch(ins);
-            if(temp->val.type != valu_type){
-                throw TypeMismatch(ins);
-            }
-            cout<<num_comp<<" "<<num_splay<<endl;
+        else if (regex_match(ins, ass_val)){ //// HAM ASSIGN VALUE
+            assign_value(ins,cur_level);
         }
-        else if(regex_match(ins, ass_vari)){               //// HAM ASSIGN VARIABLE
-            string id,valu;
-            int num_comp = 0;
-            int num_splay = 0;
-            int index[2]={0,0};
-            int j = 0;
-            for(int i=0;i<(int)ins.size();++i){
-                if(j==2) break;
-                if(ins[i]==' '){
-                    index[j]=i;
-                    j++;
-                }
-            }
-            id = ins.substr(index[0]+1,index[1]-index[0]-1);
-            valu = ins.substr(index[1]+1);
-            Node *temp_valu = isContains(valu,cur_level,num_comp,num_splay);
-            if(temp_valu == nullptr) throw Undeclared(ins);
-            if(temp_valu->val.decodes !="") throw TypeMismatch(ins);
-            Node *temp_id = isContains(id,cur_level,num_comp,num_splay);
-            if(temp_id == nullptr) {
-                throw Undeclared(ins);
-            }
-            if(temp_id->val.decodes !="") throw TypeMismatch(ins);
-            if(temp_id->val.type != temp_valu->val.type) throw TypeMismatch(ins);
-            cout<<num_comp<<" "<<num_splay<<endl;
+        else if(regex_match(ins, ass_vari)){ //// HAM ASSIGN VARIABLE
+            assign_variable(ins,cur_level);
         }
         else if(regex_match(ins,ass_func)){
-
             assign_func(ins,cur_level);
         }
         else if(regex_match(ins,look_up)){
+            string name;
             int space =(int) ins.find(' ');
             name=ins.substr(space+1);
             lookup(name,cur_level,ins);
@@ -286,7 +166,7 @@ void SymbolTable::splay(Node *&z) {
     }
     root = z;
 }
-Node *SymbolTable::searchLevell(string name, int level) {
+Node* SymbolTable::searchLevell(string name, int level) {
     Symbol *e= new Symbol(name,"null",level);
     if (root == nullptr){
         delete e;
@@ -426,7 +306,7 @@ Node* SymbolTable::isContains(string name, int level,int &num_comp,int &num_spla
     }
     return temp;
 }
-Node *SymbolTable::searchLevell_assign(string name, int level, int &num_comp,int &num_splay) {
+Node* SymbolTable::searchLevell_assign(string name, int level, int &num_comp,int &num_splay) {
     Symbol *e= new Symbol(name,"null",level);
     if (root == nullptr){
         delete e;
@@ -533,6 +413,146 @@ void SymbolTable::assign_func(string ins,int cur_level) {
     if(temp_id->val.decodes != "") throw TypeMismatch(ins);
     if(temp_id->val.type != temp_func->val.type) throw TypeMismatch(ins);
     cout<<num_comp<<" "<<num_splay<<endl;
+}
+void SymbolTable::assign_value(string ins, int cur_level) {
+    string id,valu;
+    int num_comp = 0;
+    int num_splay = 0;
+    int index[2]={0,0};
+    int j = 0;
+    for(int i=0;i<(int)ins.size();++i){
+        if(j==2) break;
+        if(ins[i]==' '){
+            index[j]=i;
+            j++;
+        }
+    }
+    id = ins.substr(index[0]+1,index[1]-index[0]-1);
+    valu = ins.substr(index[1]+1);
+    string valu_type;
+    if(valu[0]=='\'') valu_type = "string";
+    else valu_type = "number";
+    Node *temp = isContains(id,cur_level,num_comp,num_splay);
+    if(temp == nullptr) throw Undeclared(ins);
+    if(temp->val.decodes[0] == '(') throw TypeMismatch(ins);
+    if(temp->val.type != valu_type){
+        throw TypeMismatch(ins);
+    }
+    cout<<num_comp<<" "<<num_splay<<endl;
+}
+void SymbolTable::assign_variable(string ins, int cur_level) {
+    string id,valu;
+    int num_comp = 0;
+    int num_splay = 0;
+    int index[2]={0,0};
+    int j = 0;
+    for(int i=0;i<(int)ins.size();++i){
+        if(j==2) break;
+        if(ins[i]==' '){
+            index[j]=i;
+            j++;
+        }
+    }
+    id = ins.substr(index[0]+1,index[1]-index[0]-1);
+    valu = ins.substr(index[1]+1);
+    Node *temp_valu = isContains(valu,cur_level,num_comp,num_splay);
+    if(temp_valu == nullptr) throw Undeclared(ins);
+    if(temp_valu->val.decodes !="") throw TypeMismatch(ins);
+    Node *temp_id = isContains(id,cur_level,num_comp,num_splay);
+    if(temp_id == nullptr) {
+        throw Undeclared(ins);
+    }
+    if(temp_id->val.decodes !="") throw TypeMismatch(ins);
+    if(temp_id->val.type != temp_valu->val.type) throw TypeMismatch(ins);
+    cout<<num_comp<<" "<<num_splay<<endl;
+}
+void SymbolTable::insert_value(string ins, int cur_level) {
+    string name,var,isStatic,decode;
+    int count = 0;
+    int index[3]={0,0,0};
+    int j = 0;
+    for(int i=0;i<(int)ins.size();++i){
+        if(j==3) break;
+        if(ins[i]==' '){
+            index[j]=i;
+            j++;
+        }
+    }
+    name = ins.substr(index[0]+1,index[1]-index[0]-1);
+    var  = ins.substr(index[1]+1,index[2]-index[1]-1);
+    isStatic = ins.substr(index[2]+1);
+    Symbol e(name,var,cur_level);
+    if(isStatic == "true"){
+        e.scope = 0;
+    } else {
+        dList.push(e);
+        if(dList.head->val.scope == 0){
+            dList.pop();
+        }
+    }
+    Node *temp = searchLevell(e.name,e.scope);
+    if(temp== nullptr){
+        insertNode(e,count);
+    }
+    else {
+        throw Redeclared(ins);
+    }
+
+}
+void SymbolTable::insert_func(string ins,int cur_level) {
+    string name,var,isStatic,decode;
+    int count = 0;
+    int index[3]={0,0,0};
+    int j = 0;
+    for(int i=0;i<(int)ins.size();++i){
+        if(j==3) break;
+        if(ins[i]==' '){
+            index[j]=i;
+            j++;
+        }
+    }
+    name = ins.substr(index[0]+1,index[1]-index[0]-1);
+    decode  = ins.substr(index[1]+1,index[2]-index[1]-1);
+    isStatic = ins.substr(index[2]+1);
+    string decode_tmp = "(";
+    for(int i = 0 ; i < (int) decode.length() ;++i){ // number -> 0 , string -> 1
+        if(decode[i] == 'm') decode_tmp+="0";
+        if(decode[i] == 's') decode_tmp+="1";
+    }
+    if(decode_tmp[decode_tmp.length()-1] == '0'){
+        var = "number";
+    }
+    else var = "string";
+    decode_tmp.pop_back();
+    Symbol e(name,var,cur_level);
+    if(isStatic == "true"){
+        e.scope = 0;
+    } else {
+        if(cur_level > 0){
+            throw InvalidDeclaration(ins);
+        }
+    }
+    Node *temp = searchLevell(e.name,e.scope);
+    if(temp== nullptr){
+        e.decodes = decode_tmp;
+        insertNode(e,count);
+        dList.push(e);
+        if(dList.head->val.scope == 0){
+            dList.pop();
+        }
+    }
+    else {
+        throw Redeclared(ins);
+    }
+}
+void SymbolTable::DestroyRecursive(Node *node) {
+        if (node)
+        {
+            DestroyRecursive(node->left);
+            DestroyRecursive(node->right);
+            delete node;
+        }
+        root= nullptr;
 }
 
 

@@ -110,7 +110,9 @@ public:
         this->root = nullptr;
         dList= DList();
     }
-    ~SymbolTable(){};
+    ~SymbolTable(){
+        this->DestroyRecursive(root);
+    };
     void run(string filename);
     void preOrderRec(Node *cur,string &s);
     void preOrder();
@@ -123,7 +125,12 @@ public:
     void removeTree(Symbol element);
     Node* isContains(string name, int level,int &num_comp,int &num_splay);  // Use for Insert to check Symbol is exist
     void insertNode(Symbol e,int &count);
+    void insert_value(string ins,int cur_level);
+    void insert_func(string ins,int cur_level);
+    void assign_value(string ins,int cur_level);
+    void assign_variable(string ins,int cur_level);
     void assign_func(string ins,int cur_level);
+    void DestroyRecursive(Node* node);
 };
 // Insert variable
 regex ins_vari("INSERT [a-z][a-zA-Z0-9_]* (number|string) (true|false)");
