@@ -138,8 +138,6 @@ public:
     void run(string filename);
     void preOrderRec(Node *cur,string &s);
     void preOrder();
-    void inOrderRec(Node *&cur ,string &s);
-    void inOrder();
     void rightRotate(Node *&cur);
     void leftRotate(Node *&cur);
     void splay(Node *&z);
@@ -149,7 +147,8 @@ public:
     void removeTree(Symbol element);
     Node* isContains(string name, int level,int &num_comp,int &num_splay);  // Use for Insert to check Symbol is exist
     void insertNode(Symbol e,int &count);
-    void splay_insert(Node *&cur,int &nump_splay);
+    void assign_func(string ins,int cur_level);
+  //  void splay_insert(Node *&cur,int &nump_splay);
 };
 // Insert variable
 regex ins_vari("INSERT [a-z][a-zA-Z0-9_]* (number|string) (true|false)");

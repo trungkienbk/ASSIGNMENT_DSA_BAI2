@@ -142,7 +142,7 @@ void SymbolTable::run(string filename)
         }
         else if(regex_match(ins,ass_func)){
 
-            cout<<"Assign func oke "<<endl;
+            assign_func(ins,cur_level);
         }
         else if(regex_match(ins,look_up)){
             int space =(int) ins.find(' ');
@@ -186,6 +186,7 @@ void SymbolTable::preOrderRec(Node *cur,string &s) {
         return;
     }
     s+=cur->val.name + "//" + to_string(cur->val.scope)+ " ";
+    //s+=cur->val.name + "//" + to_string(cur->val.scope)+"-->"+cur->val.decodes+ "-->" +cur->val.type+" ";
     if(cur->left){
         preOrderRec(cur->left,s);
     }
@@ -203,26 +204,6 @@ void SymbolTable::preOrder() {
         s.pop_back();
     }
     cout<<s<<endl;
-}
-void SymbolTable::inOrderRec(Node *&cur ,string &s) {
-    if(cur == nullptr){
-        return;
-    }
-    if(cur->left){
-        inOrderRec(cur->left,s);
-    }
-    s+=cur->val.name + "//" + to_string(cur->val.scope)+ " ";
-    if(cur->right){
-        inOrderRec(cur->right,s);
-    }
-}
-void SymbolTable::inOrder() {
-    string s;
-    inOrderRec(root,s);
-    int length = (int) s.length();
-    if(length == 0) cout<<endl;
-    s.pop_back();
-    cout<<s;
 }
 void SymbolTable::rightRotate(Node *&z) {
     Node *l = z->left;
@@ -434,49 +415,8 @@ void SymbolTable::insertNode(Symbol e, int &count) {
     }
     splay(t);
     cout<<count<<" "<<"1"<<endl;
-    /*   int num_splay = 0;
-       Node *t = new Node(e);
-       if (root == nullptr)
-       {   cout<<count<<" "<<num_splay<<endl;
-           root = t;
-           return;
-       }
-       Node *z = root;
-       while (true)
-       {
-           if (z->val > e)
-           {   count++;
-               if (z->left == nullptr)
-               {
-                   z->left = t;
-                   t->parent = z;
-                   break;
-               }
-               else
-                   z = z->left;
-           }
-           else if (z->val < e)
-           {   count++;
-               if (z->right == nullptr)
-               {
-                   z->right = t;
-                   t->parent = z;
-                   break;
-               }
-               else
-                   z = z->right;
-           }
-           else
-           {
-               // val is already present in the three
-               break;
-           }
-       }
-       splay_insert(t,num_splay);
-       cout<<count<<" "<<num_splay<<endl; */
-
 }
-void SymbolTable::splay_insert(Node *&z, int &nump_splay) {
+/*void SymbolTable::splay_insert(Node *&z, int &nump_splay) {
     if (z == nullptr)
         return;
     while (true)
@@ -530,7 +470,7 @@ void SymbolTable::splay_insert(Node *&z, int &nump_splay) {
         }
     }
     root = z;
-}
+} */
 Node* SymbolTable::isContains(string name, int level,int &num_comp,int &num_splay) {
     int temp_comp= num_comp;
     int temp_splay = num_splay;
@@ -584,6 +524,74 @@ Node *SymbolTable::searchLevell_assign(string name, int level, int &num_comp,int
         delete e;
         return nullptr;
     }
+}
+
+void SymbolTable::assign_func(string ins,int cur_level) {
+    string id,value_func,func_name,argu;  // value_func = func_name + argu
+    int num_comp = 0;
+    int num_splay = 0;
+    int count_point = 0;
+    int index[2]={0,0};
+    int index_par[40];
+    int j = 0;
+    for(int i=0;i<(int)ins.size();++i){
+        if(j==2) break;
+        if(ins[i]==' '){
+            index[j]=i;
+            j++;
+        }
+    }
+    id = ins.substr(index[0]+1,index[1]-index[0]-1);
+    value_func  = ins.substr(index[1]+1);
+    int find_parless = value_func.find('(');
+    func_name = value_func.substr(0,find_parless); //// Name of function
+    argu = value_func.substr(find_parless);   //// List variable (...)
+    Node *temp_func = isContains(func_name,cur_level,num_comp,num_splay);
+    if(temp_func == nullptr){
+        throw Undeclared(ins);
+    }
+    if(temp_func->val.decodes == "") throw TypeMismatch(ins); //// is variabe
+    if(temp_func->val.decodes.length() == 1){ //// No argument
+        //
+    }
+    else {
+        for(char i : argu){
+            if(i == ','){
+                count_point++;
+            }
+        }
+        if(count_point + 2 != (int) temp_func->val.decodes.length()) throw TypeMismatch(ins);
+        count_point = 0;
+        for(int i = 0 ;i<(int) argu.length();++i){
+            if(argu[i] == '(' ||argu[i] == ')' ||argu[i] == ','){
+                index_par[count_point] = i;
+                count_point++;
+            }
+        }
+        int k = 1;
+        for(int i = 0 ; i< count_point-1;++i){
+            string temp = argu.substr(index_par[i]+1,index_par[i+1]-index_par[i]-1);
+            if(temp[0]>='0'  &&temp[0]<='9'){
+                if(temp_func->val.decodes[k] != '0') throw TypeMismatch(ins);
+            }
+            else if(temp[0]=='\''){
+                if(temp_func->val.decodes[k] != '1') throw TypeMismatch(ins);
+            }
+            else {
+                Node *temp_argu = isContains(temp,cur_level,num_comp,num_splay);
+                if(temp_argu == nullptr) throw Undeclared(ins);
+                if(temp_argu->val.decodes != "") throw TypeMismatch(ins);
+                if(temp_argu->val.type =="number" && temp_func->val.decodes[k]=='1') throw TypeMismatch(ins);
+                if(temp_argu->val.type =="string" && temp_func->val.decodes[k]=='0') throw TypeMismatch(ins);
+            }
+            ++k;
+        }
+    }
+    Node *temp_id = isContains(id,cur_level,num_comp,num_splay);
+    if(temp_id == nullptr) throw Undeclared(ins);
+    if(temp_id->val.decodes != "") throw TypeMismatch(ins);
+    if(temp_id->val.type != temp_func->val.type) throw TypeMismatch(ins);
+    cout<<num_comp<<" "<<num_splay<<endl;
 }
 
 
