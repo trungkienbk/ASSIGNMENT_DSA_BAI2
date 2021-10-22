@@ -48,6 +48,7 @@ void SymbolTable::run(string filename)
                 removeTree(store_order.head->val);
                 store_order.pop();
             }
+            store_order.clear();
             cur_level--;
         }
         else throw InvalidInstruction(ins);
@@ -166,12 +167,11 @@ void SymbolTable::splay(Node *&z) {
     }
     root = z;
 }
-Node* SymbolTable::searchLevell(string name, int level) {
+Node* SymbolTable::searchLevell(string name, int level) {      // DAT check
     Symbol *e= new Symbol(name,"null",level);
     if (root == nullptr){
         delete e;
         return nullptr;
-
     }
     Node *cur=root;
     while (true)
@@ -201,7 +201,7 @@ Node* SymbolTable::searchLevell(string name, int level) {
         return nullptr;
     }
 }
-void SymbolTable::removeTree(Symbol element) {
+void SymbolTable::removeTree(Symbol element) { // DAT CHECK OK
         Node *z = searchLevell(element.name,element.scope);
         if (z == nullptr)
             return ;

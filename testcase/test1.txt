@@ -1,10 +1,9 @@
-INSERT o (string)->string false
+INSERT mT string true
+INSERT kaiHvN (number,number)->string true
 BEGIN
-INSERT rxtDK number false
+INSERT t5L0Xg number false
+PRINT
 END
 PRINT
-PRINT
-INSERT gLw3 (string,number)->number true
-PRINT
-PRINT
-ASSIGN rxtDK gLw3(o,rxtDK)
+ASSIGN mT kaiHvN(mT,t5L0Xg)
+END

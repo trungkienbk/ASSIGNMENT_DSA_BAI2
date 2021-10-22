@@ -112,6 +112,8 @@ public:
     }
     ~SymbolTable(){
         this->DestroyRecursive(root);
+        dList.clear();
+
     };
     void run(string filename);
     void preOrderRec(Node *cur,string &s);
