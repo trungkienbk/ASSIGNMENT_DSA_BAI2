@@ -7,7 +7,6 @@ void SymbolTable::run(string filename)
     while (!f.eof()){
         string ins;
         getline(f, ins);
-        ins.erase( remove(ins.begin(), ins.end(), '\r'), ins.end() );
         if(regex_match(ins,ins_vari)) {     ///// HAM INSERT BIEN
             insert_value(ins,cur_level);
         }
@@ -36,19 +35,20 @@ void SymbolTable::run(string filename)
             cur_level++;
         }
         else if(ins =="END"){
-           if(cur_level == 0){
+            if(cur_level == 0){
                 throw UnknownBlock();
-           }
-           DList store_order;
+            }
+            DList store_order;
             while(dList.head && dList.head->val.scope == cur_level){
                 store_order.push(dList.head->val);
                 dList.pop();
             }
             while(store_order.head && store_order.head->val.scope == cur_level){
-                removeTree(store_order.head->val);
+                Node *pDel = searchLevell(store_order.head->val.name,store_order.head->val.scope);
+              //  removeTree(store_order.head->val);
+                remove(root,pDel);
                 store_order.pop();
             }
-            store_order.clear();
             cur_level--;
         }
         else throw InvalidInstruction(ins);
@@ -167,11 +167,12 @@ void SymbolTable::splay(Node *&z) {
     }
     root = z;
 }
-Node* SymbolTable::searchLevell(string name, int level) {      // DAT check
+Node* SymbolTable::searchLevell(string name, int level) {
     Symbol *e= new Symbol(name,"null",level);
     if (root == nullptr){
         delete e;
         return nullptr;
+
     }
     Node *cur=root;
     while (true)
@@ -201,41 +202,41 @@ Node* SymbolTable::searchLevell(string name, int level) {      // DAT check
         return nullptr;
     }
 }
-void SymbolTable::removeTree(Symbol element) { // DAT CHECK OK
-        Node *z = searchLevell(element.name,element.scope);
-        if (z == nullptr)
-            return ;
-        splay(z);
-        Node *t = z->left;
-       /* if(z->right == nullptr){
-        root=z->left; }*/
-        if(z->right == nullptr){
-            root = z ->left;
-            if(root != nullptr) root->parent = nullptr;
-        }
-        else if (t == nullptr)
+void SymbolTable::removeTree(Symbol element) {
+    Node *z = searchLevell(element.name,element.scope);
+    if (z == nullptr)
+        return ;
+    splay(z);
+    Node *t = z->left;
+    /* if(z->right == nullptr){
+     root=z->left; }*/
+    if(z->right == nullptr){
+        root = z ->left;
+        if(root != nullptr) root->parent = nullptr;
+    }
+    else if (t == nullptr)
+    {
+        root = z->right;
+        if(root != nullptr) root->parent = nullptr;
+    }
+    else
+    {
+        while (t->right)
+            t = t->right;
+        if (z->right != nullptr)
         {
-            root = z->right;
-            if(root != nullptr) root->parent = nullptr;
+            t->right = z->right;
+            z->right->parent=t;
         }
-        else
-        {
-            while (t->right)
-                t = t->right;
-            if (z->right != nullptr)
-            {
-                t->right = z->right;
-                z->right->parent=t;
-            }
-            root = z->left;
-            root->parent = nullptr;
-        }
-        delete(z);
+        root = z->left;
+        root->parent = nullptr;
+    }
+    delete(z);
 }
 void SymbolTable::lookup(string name, int level, string ins) {
     if(root == nullptr) throw Undeclared(ins);
     Symbol e("null","null",-1);
-    Node *temp = new Node(e);
+    Node *temp = nullptr;
     for(int i = level; i >= 0 ;--i){
         temp = searchLevell(name,i);
         if(temp != nullptr) {
@@ -546,265 +547,11 @@ void SymbolTable::insert_func(string ins,int cur_level) {
     }
 }
 void SymbolTable::DestroyRecursive(Node *node) {
-        if (node)
-        {
-            DestroyRecursive(node->left);
-            DestroyRecursive(node->right);
-            delete node;
-        }
-        root= nullptr;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*Node *SymbolTable::findNode(string name,int level) {
-    Symbol *e= new Symbol(name,"null",level);
-    if (root == nullptr){
-        delete e;
-        return nullptr;
-    }
-    Node *cur=root;
-    while (true)
+    if (node)
     {
-        if (cur->val == *e) break;
-        else if (cur->val > *e){
-            if (cur->left == nullptr)
-                break;
-            else {
-                cur = cur->left;
-            }
-        }
-        else{
-            if (cur->right == nullptr)
-                break;
-            else {
-                cur = cur->right;
-            }
-        }
+        DestroyRecursive(node->left);
+        DestroyRecursive(node->right);
+        delete node;
     }
-    if (cur->val == *e){
-        delete e;
-        return cur;
-    }
-    else{
-        delete e;
-        return nullptr;
-    }
+    root= nullptr;
 }
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*#include "SymbolTable.h"
-using namespace std;
-string isValidIns(string instruction){
-    if(instruction=="BEGIN" || instruction=="END" || instruction == "PRINT" ||instruction == "RPRINT") return instruction;
-    if(!regex_match(instruction, in) && !regex_match(instruction, as) && !regex_match(instruction, lk)){
-        throw InvalidInstruction(instruction);
-    }
-    if(regex_match(instruction, in)) return "INSERT";
-    if(regex_match(instruction, as))return "ASSIGN";
-    if(regex_match(instruction, lk)) return "LOOKUP";
-    return "";
-}
-int convertInt(string method ){
-    if(method == "INSERT") return 1;
-    if(method == "LOOKUP") return 2;
-    if(method == "ASSIGN") return 3;
-    if(method == "PRINT") return 4;
-    if(method == "RPRINT") return 5;
-    if(method == "BEGIN") return 6;
-    return 7;
-}
-
-void SymbolTable::run(string filename)
-{
-   // SymbolTable table;
-    int level = 0;
-    string ins;
-    ifstream input;
-    input.open(filename);
-    if(input.is_open()) {
-        while (std::getline(input, ins)) {
-            string method,name,var; // var  = type or value
-            method = isValidIns(ins);
-            int numberMethod = convertInt(method);
-            //Insert: 1 Lookup:2 Assign:3 Print:4 RPrint:5 Begin:6 End:7
-            switch (numberMethod) {
-                case 1 : { // INSERT
-                    int index[2]={0,0};
-                    int j = 0;
-                    for(int i=0;i<(int)ins.size();++i){
-                        if(j==2) break;
-                        if(ins[i]==' '){
-                            index[j]=i;
-                            j++;
-                        }
-                    }
-                    name = ins.substr(index[0]+1,index[1]-index[0]-1);
-                    var  = ins.substr(index[1]+1);
-                //     Symbol check =  table.search(name,level);
-                    Symbol check =  this->search(name,level);
-                    if(check.scope ==-1 || (check.scope !=-1 && check.scope < level)){
-                        Symbol symbol(name,var,level);
-                      //  table.push(symbol);
-                         push(symbol);
-                        cout<<"success"<<endl;
-                    }
-                    else {
-                       // table.clear();
-                        this->clear();
-                        throw Redeclared(ins);
-                    }
-                    break;
-                }
-                case 2 : {
-                    int space =(int) ins.find(' ');
-                    name=ins.substr(space+1);
-                    //Symbol check = table.search(name,level);
-                    Symbol check = this->search(name,level);
-                    if(check.scope == -1){
-                        this->clear();
-                        throw Undeclared(ins);
-                    }
-                    else {
-                        cout<<check.scope<<endl;
-                    }
-                    break;
-                }
-                case 3 : {
-                    int index[2]={0,0};
-                    int j = 0;
-                    for(int i=0;i<(int)ins.size();++i){
-                        if(j==2) break;
-                        if(ins[i]==' '){
-                            index[j]=i;
-                            j++;
-                        }
-                    }
-                    name = ins.substr(index[0]+1,index[1]-index[0]-1);
-                    var  = ins.substr(index[1]+1);
-                    assign(name,var,level,ins);
-                    break;
-                }
-                case 4 : {
-                    this->print();
-                    break;
-                }
-                case 5 : {
-                    this->rprint();
-                    break;
-                }
-                case 6 : {
-                    level++;
-                    break;
-                }
-                default :
-                    if(level == 0) {
-                        //table.clear();
-                        this->clear();
-                        throw UnknownBlock();
-                    }
-                    //table.pop_scope(level);
-                    this->pop_scope(level);
-                    level--;
-                    break;
-            }
-        }
-        if(level > 0) {
-           // table.clear();
-            this->clear();
-            throw UnclosedBlock(level);
-        }
-        input.close();
-    }
-    else {
-        cout<<filename<<" is not exist";
-    }
-}
-void SymbolTable::assign(string name, string var, int level, string ins) {
-    if(regex_match(var,re_num)){
-        Symbol check = search(name,level);
-        if(check.scope==-1) throw Undeclared(ins);
-        if(check.type=="string") throw TypeMismatch(ins);
-        cout<<"success"<<endl;
-        return;
-    }
-    if(regex_match(var,re_str) && !regex_match(var,re_num)){
-        Symbol check = search(name,level);
-        if(check.scope==-1) throw Undeclared(ins);
-        if(check.type=="number") throw TypeMismatch(ins);
-        cout<<"success"<<endl;
-        return;
-    }
-    if(!regex_match(var,re_str) && !regex_match(var,re_num)){
-        Symbol check_x = search(var,level);
-        Symbol check_y = search(name,level);
-        if(check_x.scope==-1 || check_y.scope==-1) throw Undeclared(ins);
-        if(check_x.type != check_y.type ) throw TypeMismatch(ins);
-        cout<<"success"<<endl;
-        return;
-    }
-}
-*/

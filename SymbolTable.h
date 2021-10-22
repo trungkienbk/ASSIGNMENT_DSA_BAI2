@@ -133,6 +133,47 @@ public:
     void assign_variable(string ins,int cur_level);
     void assign_func(string ins,int cur_level);
     void DestroyRecursive(Node* node);
+    Node* maximum(Node* &node)
+    {
+        while (node->right) node = node->right;
+        return node;
+    }
+
+    Node* join(Node* &left, Node* &right)
+    {
+        if (!left) return right;
+        if (!right) return left;
+
+        Node* node = maximum(left);
+        splay(node);
+        node->right = right;
+        right->parent = node;
+        return node;
+    }
+
+    void split(Node* &node, Node* &l, Node* &r)
+    {
+        splay(node);
+        if (node->right)
+        {
+            r = node->right;
+            r->parent = NULL;
+        }
+        else r = NULL;
+        l = node;
+        l->right = NULL;
+        node = NULL;
+    }
+
+    void remove(Node* &node, Node* &key) {
+        Node* x = key;
+        Node* l, *r;
+        split(x, l, r);
+        if (l->left) l->left->parent = NULL;
+        root = join(l->left, r);
+        delete(l);
+        l = NULL;
+    }
 };
 // Insert variable
 regex ins_vari("INSERT [a-z][a-zA-Z0-9_]* (number|string) (true|false)");
