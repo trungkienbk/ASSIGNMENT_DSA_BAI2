@@ -25,11 +25,6 @@ public:
         if(this->scope == e.scope && this->name.compare(e.name) < 0) return true;
         return false;
     }
-  /*   void operator=(const Symbol& e){
-        this->scope = e.scope;
-        this->name = e.name ;
-        this->type = e.type;
-    } */
     ~Symbol() {};
 };
 /////// LIST LUU THU TU//////////////////////////////////////////////////
@@ -52,20 +47,6 @@ public:
     ~DList()
     {
         this->clear();
-    }
-    void append(Symbol symbol){
-        LNode *pNew = new LNode(symbol);
-        if (!head) {
-            head = pNew;
-            tail = head;
-            this->count++;
-            return;
-        } else {
-            tail->next = pNew;
-            pNew->prev = tail;
-            tail = pNew;
-            count++;
-        }
     }
     void push(Symbol symbol) {
         LNode *pNew = new LNode(symbol);
@@ -125,11 +106,6 @@ private:
     DList dList;
     Node *root;
 public:
-    // TEST CONSTRUCTOR
-    // Symbol test("Hi","hi",1);
-    // LNode *pNew = new LNode(test);
-    // Node *pnew = new Node(test);
-    // Write function
     SymbolTable() {
         this->root = nullptr;
         dList= DList();
@@ -148,7 +124,6 @@ public:
     Node* isContains(string name, int level,int &num_comp,int &num_splay);  // Use for Insert to check Symbol is exist
     void insertNode(Symbol e,int &count);
     void assign_func(string ins,int cur_level);
-  //  void splay_insert(Node *&cur,int &nump_splay);
 };
 // Insert variable
 regex ins_vari("INSERT [a-z][a-zA-Z0-9_]* (number|string) (true|false)");
@@ -163,6 +138,34 @@ regex ass_func("ASSIGN [a-z][a-zA-Z0-9_]* [a-z][a-zA-Z0-9_]*\\(([0-9]+|\'[a-zA-Z
 // Lookup variable
 regex look_up("(LOOKUP )([a-z][a-zA-Z0-9_]*)");
 #endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

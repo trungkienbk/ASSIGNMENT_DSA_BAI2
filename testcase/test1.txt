@@ -1,13 +1,10 @@
+INSERT o (string)->string false
 BEGIN
-INSERT i2P string false
-PRINT
-ASSIGN i2P i2P
-ASSIGN i2P i2P
-LOOKUP i2P
-PRINT
+INSERT rxtDK number false
 END
-INSERT oEA3 (string,string,string)->string true
 PRINT
-INSERT roG (string,string,number)->string true
 PRINT
-ASSIGN i2P oEA3('X',roG,i2P)
+INSERT gLw3 (string,number)->number true
+PRINT
+PRINT
+ASSIGN rxtDK gLw3(o,rxtDK)

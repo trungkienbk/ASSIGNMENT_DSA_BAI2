@@ -114,7 +114,7 @@ void SymbolTable::run(string filename)
             }
             cout<<num_comp<<" "<<num_splay<<endl;
         }
-        else if(regex_match(ins, ass_vari)){
+        else if(regex_match(ins, ass_vari)){               //// HAM ASSIGN VARIABLE
             string id,valu;
             int num_comp = 0;
             int num_splay = 0;
@@ -160,10 +160,6 @@ void SymbolTable::run(string filename)
                 throw UnknownBlock();
            }
            DList store_order;
-           /*while(dList.head && dList.head->val.scope == cur_level){
-               removeTree(dList.head->val);
-               dList.pop();
-           }*/
             while(dList.head && dList.head->val.scope == cur_level){
                 store_order.push(dList.head->val);
                 dList.pop();
@@ -295,6 +291,7 @@ Node *SymbolTable::searchLevell(string name, int level) {
     if (root == nullptr){
         delete e;
         return nullptr;
+
     }
     Node *cur=root;
     while (true)
@@ -416,61 +413,6 @@ void SymbolTable::insertNode(Symbol e, int &count) {
     splay(t);
     cout<<count<<" "<<"1"<<endl;
 }
-/*void SymbolTable::splay_insert(Node *&z, int &nump_splay) {
-    if (z == nullptr)
-        return;
-    while (true)
-    {
-        Node *par = z->parent;
-        if (par == nullptr)
-        {
-            // z is the root
-            break;
-        }
-        Node *gPar = par->parent;
-        if (gPar == nullptr && par->left == z)
-        {
-            // zig
-            nump_splay++;
-            rightRotate(par);
-        }
-        else if (gPar == nullptr && par->right == z)
-        {
-            // zag
-            nump_splay++;
-            leftRotate(par);
-        }
-        else if (gPar->left == par && par->left == z)
-        {
-            // zig-zig
-            nump_splay++;
-            rightRotate(gPar);
-            rightRotate(par);
-        }
-        else if (gPar->right == par && par->right == z)
-        {
-            // zag-zag
-            nump_splay++;
-            leftRotate(gPar);
-            leftRotate(par);
-        }
-        else if (gPar->left == par && par->right == z)
-        {
-            // zig-zag
-            nump_splay++;
-            leftRotate(par);
-            rightRotate(gPar);
-        }
-        else if(gPar->right == par && par -> left ==z)
-        {
-            // zag-zig
-            nump_splay++;
-            rightRotate(par);
-            leftRotate(gPar);
-        }
-    }
-    root = z;
-} */
 Node* SymbolTable::isContains(string name, int level,int &num_comp,int &num_splay) {
     int temp_comp= num_comp;
     int temp_splay = num_splay;
@@ -525,7 +467,6 @@ Node *SymbolTable::searchLevell_assign(string name, int level, int &num_comp,int
         return nullptr;
     }
 }
-
 void SymbolTable::assign_func(string ins,int cur_level) {
     string id,value_func,func_name,argu;  // value_func = func_name + argu
     int num_comp = 0;
@@ -543,7 +484,7 @@ void SymbolTable::assign_func(string ins,int cur_level) {
     }
     id = ins.substr(index[0]+1,index[1]-index[0]-1);
     value_func  = ins.substr(index[1]+1);
-    int find_parless = value_func.find('(');
+    int find_parless = (int)value_func.find('(');
     func_name = value_func.substr(0,find_parless); //// Name of function
     argu = value_func.substr(find_parless);   //// List variable (...)
     Node *temp_func = isContains(func_name,cur_level,num_comp,num_splay);
