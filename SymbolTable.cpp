@@ -75,7 +75,6 @@ void SymbolTable::preOrder() {
     string s = "";
     preOrderRec(root,s);
     if(s.length() ==0 ) {
-        cout<<endl;
         return;
     } else {
         s.pop_back();
@@ -202,38 +201,8 @@ Node* SymbolTable::searchLevell(string name, int level) {
         return nullptr;
     }
 }
-void SymbolTable::removeTree(Symbol element) {
-    Node *z = searchLevell(element.name,element.scope);
-    if (z == nullptr)
-        return ;
-    splay(z);
-    Node *t = z->left;
-    /* if(z->right == nullptr){
-     root=z->left; }*/
-    if(z->right == nullptr){
-        root = z ->left;
-        if(root != nullptr) root->parent = nullptr;
-    }
-    else if (t == nullptr)
-    {
-        root = z->right;
-        if(root != nullptr) root->parent = nullptr;
-    }
-    else
-    {
-        while (t->right)
-            t = t->right;
-        if (z->right != nullptr)
-        {
-            t->right = z->right;
-            z->right->parent=t;
-        }
-        root = z->left;
-        root->parent = nullptr;
-    }
-    delete(z);
-}
 void SymbolTable::lookup(string name, int level, string ins) {
+    if(isValidId(name) == false) throw InvalidInstruction(ins); // Name la key word
     if(root == nullptr) throw Undeclared(ins);
     Symbol e("null","null",-1);
     Node *temp = nullptr;
@@ -431,6 +400,7 @@ void SymbolTable::assign_value(string ins, int cur_level) {
     id = ins.substr(index[0]+1,index[1]-index[0]-1);
     valu = ins.substr(index[1]+1);
     string valu_type;
+    if(isValidId(id) == false) throw InvalidInstruction(ins); // Name la key word
     if(valu[0]=='\'') valu_type = "string";
     else valu_type = "number";
     Node *temp = isContains(id,cur_level,num_comp,num_splay);
@@ -456,6 +426,8 @@ void SymbolTable::assign_variable(string ins, int cur_level) {
     }
     id = ins.substr(index[0]+1,index[1]-index[0]-1);
     valu = ins.substr(index[1]+1);
+    if(isValidId(id) == false) throw InvalidInstruction(ins); // Name la key word
+    if(isValidId(valu) == false) throw InvalidInstruction(ins); // Name la key word
     Node *temp_valu = isContains(valu,cur_level,num_comp,num_splay);
     if(temp_valu == nullptr) throw Undeclared(ins);
     if(temp_valu->val.decodes !="") throw TypeMismatch(ins);
@@ -481,6 +453,7 @@ void SymbolTable::insert_value(string ins, int cur_level) {
     }
     name = ins.substr(index[0]+1,index[1]-index[0]-1);
     var  = ins.substr(index[1]+1,index[2]-index[1]-1);
+    if(isValidId(name) == false) throw InvalidInstruction(ins); // Name la key word
     isStatic = ins.substr(index[2]+1);
     Symbol e(name,var,cur_level);
     if(isStatic == "true"){
@@ -516,6 +489,7 @@ void SymbolTable::insert_func(string ins,int cur_level) {
     decode  = ins.substr(index[1]+1,index[2]-index[1]-1);
     isStatic = ins.substr(index[2]+1);
     string decode_tmp = "(";
+    if(isValidId(name) == false) throw InvalidInstruction(ins); // Name la key word
     for(int i = 0 ; i < (int) decode.length() ;++i){ // number -> 0 , string -> 1
         if(decode[i] == 'm') decode_tmp+="0";
         if(decode[i] == 's') decode_tmp+="1";
@@ -546,12 +520,16 @@ void SymbolTable::insert_func(string ins,int cur_level) {
         throw Redeclared(ins);
     }
 }
-void SymbolTable::DestroyRecursive(Node *node) {
+void SymbolTable::DestroyTree(Node *node) {
     if (node)
     {
-        DestroyRecursive(node->left);
-        DestroyRecursive(node->right);
+        DestroyTree(node->left);
+        DestroyTree(node->right);
         delete node;
     }
     root= nullptr;
+}
+bool SymbolTable::isValidId(string id) {
+    if(id =="true" ||  id == "false"|| id =="string" || id =="number") return false;
+    return true;
 }

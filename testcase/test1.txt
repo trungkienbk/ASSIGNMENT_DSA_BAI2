@@ -1,3 +1,13 @@
 BEGIN
-INSERT v number false
-INSERT v ()->number true
+INSERT z string false
+LOOKUP z
+ASSIGN y false
+PRINT
+END
+BEGIN
+PRINT
+INSERT ejUHx (string,number)->number true
+BEGIN
+LOOKUP ejUHx
+PRINT
+ASSIGN dz ejUHx(dz,323)

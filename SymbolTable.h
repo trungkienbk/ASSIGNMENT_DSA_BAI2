@@ -111,11 +111,12 @@ public:
         dList= DList();
     }
     ~SymbolTable(){
-        this->DestroyRecursive(root);
+        this->DestroyTree(root);
         dList.clear();
 
     };
     void run(string filename);
+    bool isValidId(string id);
     void preOrderRec(Node *cur,string &s);
     void preOrder();
     void rightRotate(Node *&cur);
@@ -124,7 +125,6 @@ public:
     Node* searchLevell(string name,int level);// Return Node in tung level
     Node* searchLevell_assign(string name,int level,int &num_comp,int &num_splay);
     void lookup(string name,int level,string ins);    // Cout scope
-    void removeTree(Symbol element);
     Node* isContains(string name, int level,int &num_comp,int &num_splay);  // Use for Insert to check Symbol is exist
     void insertNode(Symbol e,int &count);
     void insert_value(string ins,int cur_level);
@@ -132,47 +132,42 @@ public:
     void assign_value(string ins,int cur_level);
     void assign_variable(string ins,int cur_level);
     void assign_func(string ins,int cur_level);
-    void DestroyRecursive(Node* node);
-    Node* maximum(Node* &node)
-    {
-        while (node->right) node = node->right;
-        return node;
+    void DestroyTree(Node* node);
+    Node* max_Node(Node* &node){
+        while (node->right) {
+            node = node->right;
+        } return node;
     }
-
-    Node* join(Node* &left, Node* &right)
-    {
-        if (!left) return right;
-        if (!right) return left;
-
-        Node* node = maximum(left);
-        splay(node);
-        node->right = right;
-        right->parent = node;
-        return node;
+    Node* joining(Node* &left, Node* &right){
+        if (left == nullptr) return right;
+        if (right == nullptr) return left;
+        Node* cur_node = max_Node(left);
+        splay(cur_node);
+        cur_node->right = right;
+        right->parent = cur_node;
+        return cur_node;
     }
-
-    void split(Node* &node, Node* &l, Node* &r)
-    {
-        splay(node);
-        if (node->right)
+    void detached(Node* &cur, Node* &l, Node* &r){
+        splay(cur);
+        if (cur->right)
         {
-            r = node->right;
-            r->parent = NULL;
+            r = cur->right;
+            r->parent = nullptr;
         }
-        else r = NULL;
-        l = node;
-        l->right = NULL;
-        node = NULL;
+        else r = nullptr;
+        l = cur;
+        l->right = nullptr;
+        cur = nullptr;
     }
-
-    void remove(Node* &node, Node* &key) {
+    void remove(Node* &node, Node* &key)  {
         Node* x = key;
-        Node* l, *r;
-        split(x, l, r);
-        if (l->left) l->left->parent = NULL;
-        root = join(l->left, r);
-        delete(l);
-        l = NULL;
+        Node* le, *ri;
+        detached(x, le, ri);
+        if (le->left) {
+            le->left->parent = nullptr;}
+        root = joining(le->left, ri);
+        delete(le);
+        le = nullptr;
     }
 };
 // Insert variable
