@@ -81,86 +81,86 @@ void SymbolTable::preOrder() {
     }
     cout<<s<<endl;
 }
-void SymbolTable::rightRotate(Node *&z) {
-    Node *l = z->left;
+void SymbolTable::rightRotate(Node *&curr) {
+    Node *l = curr->left;
     Node *c = l->right;
-    Node *p = z->parent;
+    Node *p = curr->parent;
     if (p != nullptr)
     {
-        if (p->left == z)
+        if (p->left == curr)
             p->left = l;
         else
             p->right = l;
     }
     l->parent = p;
-    l->right = z;
-    z->parent = l;
-    z->left = c;
+    l->right = curr;
+    curr->parent = l;
+    curr->left = c;
     if (c != nullptr)
-        c->parent = z;
+        c->parent = curr;
 }
-void SymbolTable::leftRotate(Node *&z) {
-    Node *r = z->right;
+void SymbolTable::leftRotate(Node *&curr) {
+    Node *r = curr->right;
     Node *c = r->left;
-    Node *p = z->parent;
+    Node *p = curr->parent;
     if (p != nullptr)
     {
-        if (p->left == z)
+        if (p->left == curr)
             p->left = r;
         else
             p->right = r;
     }
     r->parent = p;
-    r->left = z;
-    z->parent = r;
-    z->right = c;
+    r->left = curr;
+    curr->parent = r;
+    curr->right = c;
     if (c != nullptr)
-        c->parent = z;
+        c->parent =curr;
 }
 void SymbolTable::splay(Node *&z) {
     if (z == nullptr)
         return;
     while (true)
     {
-        Node *par = z->parent;
-        if (par == nullptr)
+        Node *parr = z->parent;
+        if (parr == nullptr)
         {
             // z is the root
             break;
         }
-        Node *gPar = par->parent;
-        if (gPar == nullptr && par->left == z)
+        Node *gPar = parr->parent;
+        if (gPar == nullptr && parr->left == z)
         {
             // zig
-            rightRotate(par);
+            rightRotate(parr);
         }
-        else if (gPar == nullptr && par->right == z)
+        else if (gPar == nullptr && parr->right == z)
         {
             // zag
-            leftRotate(par);
+            leftRotate(parr);
         }
-        else if (gPar->left == par && par->left == z)
+        else if (gPar->left == parr && parr->left == z)
         {
             // zig-zig
             rightRotate(gPar);
-            rightRotate(par);
+            rightRotate(parr);
         }
-        else if (gPar->right == par && par->right == z)
+        else if (gPar->right == parr && parr->right == z)
         {
             // zag-zag
             leftRotate(gPar);
-            leftRotate(par);
+            leftRotate(parr);
         }
-        else if (gPar->left == par && par->right == z)
+        else if (gPar->left == parr && parr->right == z)
         {
             // zig-zag
-            leftRotate(par);
+            leftRotate(parr);
             rightRotate(gPar);
         }
-        else if(gPar->right == par && par -> left ==z)
+        else if(gPar->right == parr && parr-> left ==z)
         {
             // zag-zig
-            rightRotate(par);
+            rightRotate(parr);
             leftRotate(gPar);
         }
     }
@@ -318,6 +318,7 @@ Node* SymbolTable::searchLevell_assign(string name, int level, int &num_comp,int
     }
 }
 void SymbolTable::assign_func(string ins,int cur_level) {
+    if(isKeyword(ins)) throw InvalidInstruction(ins);
     string id,value_func,func_name,argu;  // value_func = func_name + argu
     int num_comp = 0;
     int num_splay = 0;
@@ -532,4 +533,37 @@ void SymbolTable::DestroyTree(Node *node) {
 bool SymbolTable::isValidId(string id) {
     if(id =="true" ||  id == "false"|| id =="string" || id =="number") return false;
     return true;
+}
+bool SymbolTable::isKeyword(const string &ins) {
+    string id, valu;
+    stringstream ss(ins);
+    ss >> id >> id;
+    getline(ss,valu);
+    valu = valu.substr(1);
+    if(!isValidId(id)) return true;
+    if(valu[valu.size()-1]==')') {
+        size_t posi_S = 0;
+        size_t posi_E = valu.find('(');
+
+        string funcIden = valu.substr(posi_S, posi_E);
+        if(!isValidId(funcIden)) return true;
+
+        if(valu[valu.size()-2] != '(') {
+            posi_S = posi_E+1;
+            posi_E = valu.find(',', posi_S);
+
+            while(posi_E != string::npos) {
+                string paraName = valu.substr(posi_S, posi_E-posi_S);
+                if(!isValidId(paraName)) return true;
+                posi_S = posi_E+1;
+                posi_E = valu.find(',', posi_S);
+            }
+            string argu_name = valu.substr(posi_S, valu.size() - posi_S - 1);
+            if(!isValidId(argu_name)) return true;
+        }
+
+    } else {
+        if(!isValidId(valu)) return true;
+    }
+    return false;
 }

@@ -169,6 +169,7 @@ public:
         delete(le);
         le = nullptr;
     }
+    bool isKeyword(const string& ins);
 };
 // Insert variable
 regex ins_vari("INSERT [a-z][a-zA-Z0-9_]* (number|string) (true|false)");

@@ -1,13 +1,3 @@
-BEGIN
-INSERT z string false
-LOOKUP z
-ASSIGN y false
-PRINT
-END
-BEGIN
-PRINT
-INSERT ejUHx (string,number)->number true
-BEGIN
-LOOKUP ejUHx
-PRINT
-ASSIGN dz ejUHx(dz,323)
+INSERT dz string false
+INSERT ejUHx (string,number)->string true
+ASSIGN string ejUHx(dz,323)
